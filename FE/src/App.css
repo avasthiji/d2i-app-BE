@@ -1,0 +1,37 @@
+/*  */
+/* App.css */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Ensure it takes full height */
+}
+
+header {
+    background-color: #1f2937;
+    /* Adjust to match your header color */
+    color: white;
+    padding: 1rem;
+    /* Adjust as needed */
+    text-align: center;
+}
+
+main {
+    flex: 1;
+}
+
+section {
+    background-color: #f9fafb;
+    /* Adjust to match your background color */
+    padding: 2rem;
+    /* Adjust as needed */
+}
