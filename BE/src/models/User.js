@@ -6,11 +6,18 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   bloodGroup: { type: String, required: true },
   officialEmail: { type: String, required: true, unique: true },
-  alternateEmail: { type: String },
+  alternateEmail: { type: String, default: null },
   contactNumber: { type: String, required: true },
-  alternateContactNumber: { type: String },
+  alternateContactNumber: { type: String, default: null },
   birthday: { type: Date, required: true },
   password: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+  parent_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  department: { type: String, default: null },
 });
 
 // Pre-save hook to hash the password
