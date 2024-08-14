@@ -6,6 +6,7 @@ const { RouteHelper } = require("../utils/RouteHelper");
 const UserController = require("../controllers/UserController");
 const SignupController = require("../controllers/SignupController");
 const LoginController = require("../controllers/LoginController");
+const MetricController = require("../controllers/MetricController");
 
 //authMiddleware
 
@@ -13,5 +14,6 @@ const LoginController = require("../controllers/LoginController");
 RouteHelper.resource(router, "signup", SignupController);
 RouteHelper.resource(router, "login", LoginController);
 RouteHelper.resource(router, "users", UserController);
+RouteHelper.resource(router,'metrics',MetricController);
 
 module.exports.router = router;

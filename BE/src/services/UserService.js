@@ -28,14 +28,14 @@ module.exports.UserService = {
       throw new Error("Error fetching user by Id");
     }
   },
-  createUser: async (userData) => {
-    try {
-      // console.log("creating user service");
-      return await insertRecord(User, userData);
-    } catch (error) {
-      throw new Error("Error creating user:" + error.message);
-    }
-  },
+  // createUser: async (userData) => {
+  //   try {
+  //     // console.log("creating user service");
+  //     return await insertRecord(User, userData);
+  //   } catch (error) {
+  //     throw new Error("Error creating user:" + error.message);
+  //   }
+  // },
   updateUser: async (userId, updateData) => {
     try {
       return await updateRecordsByKey(User, { _id: userId }, updateData);

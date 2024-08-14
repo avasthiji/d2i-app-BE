@@ -29,16 +29,16 @@ module.exports = {
   },
 
   //create
-  create: async (req, res, next) => {
-    try {
-      const userData = req.body;
-      const newUser = await UserService.createUser(userData);
-      res.status(201).json(newUser);
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
-  },
+  // create: async (req, res, next) => {
+  //   try {
+  //     const userData = req.body;
+  //     const newUser = await UserService.createUser(userData);
+  //     res.status(201).json(newUser);
+  //   } catch (error) {
+  //     console.log(error);
+  //     next(error);
+  //   }
+  // },
 
   //update
   update: async (req, res, next) => {
