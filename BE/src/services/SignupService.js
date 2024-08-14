@@ -9,9 +9,7 @@ const AuthService = require("./AuthService");
 module.exports.SignupService = {
   registerUser: async (userData) => {
     try {
-      const user = new User(userData);
-      // const user = await insertRecord(TABLE_NAMES.USERS, userData);
-      // console.log(user);
+      const user = await insertRecord(TABLE_NAMES.USERS, userData);
       await user.save()
       
       if(!user){

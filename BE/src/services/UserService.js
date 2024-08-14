@@ -11,9 +11,8 @@ const {
 module.exports.UserService = {
   getAllUsers: async () => {
     try {
-      console.log("get all users req");
-      const users = await getRecordsByKey(User, {});
-      // const users = await User.find();
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, {});
+      
       return users;
     } catch (error) {
       throw new Error("Error fetching users: " + error.message);
@@ -21,8 +20,8 @@ module.exports.UserService = {
   },
   getUserByID: async (userId) => {
     try {
-      const user = await getRecordByKey(User, { _id: userId });
-      // const user = await User.findById(userId);
+      const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
+
       return user;
     } catch (error) {
       throw new Error("Error fetching user by Id");
@@ -38,14 +37,18 @@ module.exports.UserService = {
   // },
   updateUser: async (userId, updateData) => {
     try {
-      return await updateRecordsByKey(User, { _id: userId }, updateData);
+      return await updateRecordsByKey(
+        TABLE_NAMES.USERS,
+        { _id: userId },
+        updateData
+      );
     } catch (error) {
       throw new Error("Error updating user:" + error.message);
     }
   },
   deleteUser: async (userId) => {
     try {
-      return await deleteRecordsById(User, { _id: userId });
+      return await deleteRecordsById(TABLE_NAMES.USERS, { _id: userId });
     } catch (error) {
       throw new Error("Error deleting user" + error.message);
     }

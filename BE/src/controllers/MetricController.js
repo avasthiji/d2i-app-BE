@@ -66,7 +66,7 @@ module.exports = {
         if(!deletedMetric){
             return res.status(404).json({message:"Metric not found"});
         }
-        res.status(200).josn({message:"Metric deleted successfully"});
+        res.status(200).json({message:"Metric deleted successfully"});
     }catch(error){
          console.log(error);
          next(error);

@@ -3,12 +3,15 @@ const bcrypt = require("bcrypt");
 const AuthService = require("./AuthService");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { AccessDeniedError } = require("../exceptions");
+const { TABLE_NAMES } = require("../utils/db");
+const { getRecordByKey } = require("../utils/QueryBuilder");
 
 module.exports.LoginService = {
   loginUser: async (officialEmail, password) => {
     try {
       // Check if user exists
-      const user = await User.findOne({ officialEmail });
+      const user = await getRecordByKey(TABLE_NAMES.USERS,{officialEmail});
+      
       if (!user) throw new Error("User not found");
       //check if passowrd matches
       const isMatch = await bcrypt.compare(password, user.password);

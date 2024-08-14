@@ -1,13 +1,14 @@
 const Metric = require('../models/Metric');
 const { ApiResponse } = require('../utils/ApiHelper');
-const { getRecordByKey, updateRecordsByKey, deleteRecordsById, getRecordsByKey } = require('../utils/QueryBuilder');
+const { TABLE_NAMES } = require('../utils/db');
+const { getRecordByKey, updateRecordsByKey, deleteRecordsById, getRecordsByKey, insertRecord } = require('../utils/QueryBuilder');
 
 module.exports.MetricService ={
 
     createMetric: async(metricData)=>{
         try{
-            const metric = new Metric(metricData);
-            await metric.save();
+            // const metric = new Metric(metricData);
+            const metric = await insertRecord(TABLE_NAMES.METRICS, metricData);
 
             if(!metric){
                 throw new Error("Error creating metric:");
@@ -19,7 +20,7 @@ module.exports.MetricService ={
     },
     getAllMetrics: async()=>{
         try{
-            const metrics = await getRecordsByKey(Metric,{});
+            const metrics = await getRecordsByKey(TABLE_NAMES.METRICS, {});
             return ApiResponse("success",metrics);
         }catch(error){
             throw new Error("Error fetching metrics:"+ error.message);
@@ -27,7 +28,9 @@ module.exports.MetricService ={
     },
     getMetricsById: async (metricId)=>{
         try{
-            const metric = await getRecordByKey(Metric, {_id: metricId});
+            const metric = await getRecordByKey(TABLE_NAMES.METRICS, {
+              _id: metricId,
+            });
 
             if(!metric) throw new Error("Metric not found");
             
@@ -38,14 +41,20 @@ module.exports.MetricService ={
     },
     updateMetric: async(metricId,metricData)=>{
         try{
-            return await updateRecordsByKey(Metric, {_id:metricId}, metricData);
+            return await updateRecordsByKey(
+              TABLE_NAMES.METRICS,
+              { _id: metricId },
+              metricData
+            );
         }catch(error){
             throw new Error("Error updating metric:" + error.message);
         }
     },
     deleteMetric: async(metricId)=>{
         try{
-            return await deleteRecordsById(Metric, {_id:metricId}); 
+            return await deleteRecordsById(TABLE_NAMES.METRICS, {
+              _id: metricId,
+            }); 
         }catch(error){
             throw new Error("Error deleting metric:"+ error.message);
         }

@@ -1,7 +1,7 @@
 const users = require('../models/User');
 const updateRecordsByKey = async function (TABLENAME, filter, update) {
   try {
-    return await TABLENAME.findOneAndUpdate(filter, update);
+    return await TABLENAME.findOneAndUpdate(filter, update, {new: true});
   } catch (error) {
     return error.message;
   }
