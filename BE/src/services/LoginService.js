@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const AuthService = require("./AuthService");
+const { ApiResponse } = require("../utils/ApiHelper");
+const { AccessDeniedError } = require("../exceptions");
 
 module.exports.LoginService = {
   loginUser: async (officialEmail, password) => {
@@ -15,7 +17,7 @@ module.exports.LoginService = {
       // Generate a token
       const authToken = AuthService.createToken(user.id);
 
-      return {
+      return  ApiResponse("success",{
         token: authToken,
         userId: user._id,
         firstName: user.firstName,
@@ -26,9 +28,9 @@ module.exports.LoginService = {
         alternateContactNumber: user.alternateContactNumber,
         birthday: user.birthday,
         bloodGroup: user.bloodGroup,
-      };
+      });
     } catch (error) {
-      throw new Error("Error registering user:" + error.message);
+      throw new AccessDeniedError({"message":error.message});
     }
   },
 };
