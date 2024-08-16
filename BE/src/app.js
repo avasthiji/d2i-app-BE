@@ -28,9 +28,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // app.use(express.static(path.join(__dirname, "../D2iApp")));
 app.use("/api/v1", router);
 
-router.get("/health", async function (req, res) {
-  res.json({ message: "Server is UP!!!", api: true });
-});
+// router.get("/health", async function (req, res) {
+//   res.json({ message: "Server is UP!!!", api: true });
+// });
 // app.use(function (req, res, next) {
 //   return res
 //     .status(200)

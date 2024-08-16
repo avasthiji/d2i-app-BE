@@ -2,28 +2,51 @@ const { MetricService } = require("../services/MetricService");
 
 module.exports = {
   //index
-  index: async (req, res, next) => {
-    try {
-      const data = await MetricService.getAllMetrics();
+  // index: async (req, res, next) => {
+  //   try {
+  //     const data = await MetricService.getAllMetrics();
+  //     res.status(200).json(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     next(error);
+  //   }
+  // },
+  index:async (req,res,next)=>{
+    try{
+      const data = await MetricService.getParentMetrics();
       res.status(200).json(data);
-    } catch (error) {
+    }catch(error){
       console.log(error);
       next(error);
     }
   },
 
   //show
-  show: async (req, res, next) => {
-    try {
-      const metricId = req.params.metrics_id;
+  // show: async (req, res, next) => {
+  //   try {
+  //     const metricId = req.params.metrics_id;
       
-      const data = await MetricService.getMetricsById(metricId);
+  //     const data = await MetricService.getMetricsById(metricId);
 
-      if (!data) {
-        return res.status(404).json({ message: "Metric not found" });
+  //     if (!data) {
+  //       return res.status(404).json({ message: "Metric not found" });
+  //     }
+  //     res.status(200).json(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     next(error);
+  //   }
+  // },
+  show: async (req,res,next)=>{
+    try{
+      const parentId = req.params.metrics_id;
+      const data = await MetricService.getChildMetricsByParentId(parentId);
+
+      if(!data){
+        return res.status(404).json({message:"No child metrics found for this parent"})
       }
       res.status(200).json(data);
-    } catch (error) {
+    }catch(error){
       console.log(error);
       next(error);
     }
