@@ -12,7 +12,7 @@ module.exports.UserService = {
   getAllUsers: async () => {
     try {
       const users = await getRecordsByKey(TABLE_NAMES.USERS, {});
-      
+
       return users;
     } catch (error) {
       throw new Error("Error fetching users: " + error.message);

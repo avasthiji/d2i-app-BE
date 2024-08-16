@@ -7,7 +7,7 @@ module.exports = {
       const data = await UserService.getAllUsers(); //service method to get all users
       res.status(200).json(data);
     } catch (error) {
-      console.log(error); //needs a handleError utils
+      console.log(error);
       next(error);
     }
   },
@@ -23,8 +23,8 @@ module.exports = {
       }
       res.status(200).json(data);
     } catch (error) {
-      console.log(error); // Log the error
-      next(error); // Pass the error to the error handling middleware
+      console.log(error);
+      next(error);
     }
   },
 

@@ -1,4 +1,3 @@
-// src/config/jwtconfig.js
 require("dotenv").config();
 
 module.exports = {

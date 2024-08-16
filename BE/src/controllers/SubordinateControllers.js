@@ -7,8 +7,8 @@ module.exports = {
       const data = await SubordinateService.getAllSubordinates(); //service method to get all users
       res.status(200).json(data);
     } catch (error) {
-      console.log(error); //needs a handleError utils
+      console.log(error);
       next(error);
     }
-  }
+  },
 };

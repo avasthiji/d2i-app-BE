@@ -5,7 +5,7 @@ const AuthService = {
   createToken: (userId, userRole) => {
     const payload = {
       // add additional payload when needed using db query
-      userId
+      userId,
     };
     return jwt.sign(payload, jwtconfig.JWT_SECRET, {
       algorithm: jwtconfig.JWT_ALGO,
@@ -31,8 +31,7 @@ const AuthService = {
     } catch (e) {
       return null;
     }
-  }
-  
+  },
 };
 
 module.exports = AuthService;

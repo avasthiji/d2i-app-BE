@@ -10,15 +10,15 @@ module.exports.SignupService = {
   registerUser: async (userData) => {
     try {
       const user = await insertRecord(TABLE_NAMES.USERS, userData);
-      await user.save()
-      
-      if(!user){
+      await user.save();
+
+      if (!user) {
         throw new Error("Error registering user:");
       }
       // Generate a token
       const authToken = AuthService.createToken(user.id);
 
-      return ApiResponse("success",{
+      return ApiResponse("success", {
         token: authToken,
         userId: user._id,
         firstName: user.firstName,
@@ -31,7 +31,7 @@ module.exports.SignupService = {
         bloodGroup: user.bloodGroup,
       });
     } catch (error) {
-      throw new DuplicateEntry({"message":error.message});
+      throw new DuplicateEntry({ message: error.message });
     }
   },
 };
