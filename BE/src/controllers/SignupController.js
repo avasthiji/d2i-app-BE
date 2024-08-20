@@ -6,7 +6,6 @@ module.exports = {
       const userData = req.body;
       const data = await SignupService.registerUser(userData);
       return res.status(200).json(data);
-      // return data;
     } catch (error) {
       console.error(error);
       next(error);

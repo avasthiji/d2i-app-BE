@@ -100,6 +100,10 @@ module.exports.MetricService = {
       throw new Error("metric not found");
      }
      const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {parent_id:metricId});
+     
+     if (!childMetrics) {
+       throw new Error("metric not found");
+     }
      const result = {
       ...parentMetric._doc,
       sub_metrics:childMetrics

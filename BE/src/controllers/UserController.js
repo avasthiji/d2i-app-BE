@@ -18,9 +18,6 @@ module.exports = {
       const userId = req.params.users_id;
       const data = await UserService.getUserByID(userId);
 
-      if (!data) {
-        return res.status(404).json({ message: "User not found" });
-      }
       res.status(200).json(data);
     } catch (error) {
       console.log(error);

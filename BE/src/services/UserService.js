@@ -1,3 +1,4 @@
+const { NotFoundError } = require("../exceptions");
 const User = require("../models/User");
 const { TABLE_NAMES } = require("../utils/db");
 const {
@@ -22,9 +23,13 @@ module.exports.UserService = {
     try {
       const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
 
+      if(!user){
+        throw new Error("User not Found")
+      }
       return user;
     } catch (error) {
-      throw new Error("Error fetching user by Id");
+      // throw new NotFoundError({message:error.message});
+      throw new NotFoundError(error.message);
     }
   },
   // createUser: async (userData) => {

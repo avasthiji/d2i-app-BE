@@ -33,7 +33,8 @@ module.exports.LoginService = {
         bloodGroup: user.bloodGroup,
       });
     } catch (error) {
-      throw new AccessDeniedError({"message":error.message});
+      throw new AccessDeniedError(error);
+      // throw new Error({"message":error});
     }
   },
 };

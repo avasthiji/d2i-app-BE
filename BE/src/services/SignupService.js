@@ -1,4 +1,4 @@
-const { DuplicateEntry } = require("../exceptions");
+const { ValidationError } = require("../exceptions");
 const User = require("../models/User");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
@@ -10,9 +10,8 @@ module.exports.SignupService = {
   registerUser: async (userData) => {
     try {
       const user = await insertRecord(TABLE_NAMES.USERS, userData);
-      await user.save();
-
-      if (!user) {
+    
+      if (!user._id) {
         throw new Error("Error registering user:");
       }
       // Generate a token
@@ -31,7 +30,7 @@ module.exports.SignupService = {
         bloodGroup: user.bloodGroup,
       });
     } catch (error) {
-      throw new DuplicateEntry({ message: error.message });
+      throw new ValidationError({ message: error.message });
     }
   },
 };
