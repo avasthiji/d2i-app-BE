@@ -26,28 +26,39 @@ module.exports = {
   },
 
   //create
-  // create: async (req, res, next) => {
-  //   try {
-  //     const userData = req.body;
-  //     const newUser = await UserService.createUser(userData);
-  //     res.status(201).json(newUser);
-  //   } catch (error) {
-  //     console.log(error);
-  //     next(error);
-  //   }
-  // },
+  create: async (req, res, next) => {
+    try {
+      const userData = req.body;
+      const { is_admin } = req.auth;
+      if (is_admin) {
+        const newUser = await UserService.createUser(userData);
+        res.status(201).json(newUser);
+      } else {
+        res.status(403).json({ message: "Access denied" });
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
 
   //update
   update: async (req, res, next) => {
     try {
       const userId = req.params.users_id;
       const updateData = req.body;
-      const updatedUser = await UserService.updateUser(userId, updateData);
 
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
+      const { is_admin } = req.auth;
+
+      if (is_admin) {
+        const updatedUser = await UserService.updateUser(userId, updateData);
+        if (!updatedUser) {
+          res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(updatedUser);
+      } else {
+        res.status(403).json({ message: "Access denied" });
       }
-      res.status(200).json(updatedUser);
     } catch (error) {
       console.log(error);
       next(error);
@@ -58,12 +69,17 @@ module.exports = {
   delete: async (req, res, next) => {
     try {
       const userId = req.params.users_id;
-      const deletedUser = await UserService.deleteUser(userId);
 
-      if (!deletedUser) {
-        return res.status(404).josn({ message: "User not found" });
+      const { is_admin } = req.auth;
+      if (is_admin) {
+        const deletedUser = await UserService.deleteUser(userId);
+        if (!deletedUser) {
+          res.status(404).josn({ message: "User not found" });
+        }
+        res.status(200).json({ message: "User deleted successfully" });
+      } else {
+        res.status(403).json({ message: "Access denied" });
       }
-      res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
       console.log(error);
       next(error);

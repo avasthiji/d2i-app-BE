@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
   department: { type: String, default: null },
+  role: {
+    type: String,
+    enum: ["USER", "ADMIN"],
+    default: "USER",
+  },
 });
 
 // Pre-save hook to hash the password

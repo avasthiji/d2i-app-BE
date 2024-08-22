@@ -23,8 +23,8 @@ module.exports.UserService = {
     try {
       const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
 
-      if(!user){
-        throw new Error("User not Found")
+      if (!user) {
+        throw new Error("User not Found");
       }
       return user;
     } catch (error) {
@@ -32,21 +32,22 @@ module.exports.UserService = {
       throw new NotFoundError(error.message);
     }
   },
-  // createUser: async (userData) => {
-  //   try {
-  //     // console.log("creating user service");
-  //     return await insertRecord(User, userData);
-  //   } catch (error) {
-  //     throw new Error("Error creating user:" + error.message);
-  //   }
-  // },
+  createUser: async (userData) => {
+    try {
+      // console.log("creating user service");
+      return await insertRecord(User, userData);
+    } catch (error) {
+      throw new Error("Error creating user:" + error.message);
+    }
+  },
   updateUser: async (userId, updateData) => {
     try {
-      return await updateRecordsByKey(
+      let updatedData = await updateRecordsByKey(
         TABLE_NAMES.USERS,
         { _id: userId },
         updateData
       );
+      return updatedData;
     } catch (error) {
       throw new Error("Error updating user:" + error.message);
     }

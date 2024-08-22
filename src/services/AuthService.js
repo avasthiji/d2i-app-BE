@@ -6,6 +6,7 @@ const AuthService = {
     const payload = {
       // add additional payload when needed using db query
       userId,
+      userRole,
     };
     return jwt.sign(payload, jwtconfig.JWT_SECRET, {
       algorithm: jwtconfig.JWT_ALGO,
@@ -23,10 +24,16 @@ const AuthService = {
         audience: jwtconfig.JWT_AUDIENCE,
         issuer: jwtconfig.JWT_ISSUER,
       });
-      let userId = authToken.userId;
+
+      // let userId = authToken.userId;
       // await authToken.then(user=>{
-      //        userId = user.userId
-      //    })
+      //   console.log('inise authtoekn await');
+
+      //   console.log(user);
+
+      //   userId = user.userId
+      // })
+
       return authToken;
     } catch (e) {
       return null;

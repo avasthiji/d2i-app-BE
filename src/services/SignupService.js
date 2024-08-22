@@ -10,12 +10,15 @@ module.exports.SignupService = {
   registerUser: async (userData) => {
     try {
       const user = await insertRecord(TABLE_NAMES.USERS, userData);
-    
+
+      console.log("Inside signupservice");
+      console.log(user);
+
       if (!user._id) {
         throw new Error("Error registering user:");
       }
       // Generate a token
-      const authToken = AuthService.createToken(user.id);
+      const authToken = AuthService.createToken(user.id, user.role);
 
       return ApiResponse("success", {
         token: authToken,
@@ -28,6 +31,7 @@ module.exports.SignupService = {
         alternateContactNumber: user.alternateContactNumber,
         birthday: user.birthday,
         bloodGroup: user.bloodGroup,
+        role: user.role,
       });
     } catch (error) {
       throw new ValidationError({ message: error.message });

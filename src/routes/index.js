@@ -17,14 +17,25 @@ const validate = require("../middlewares/ValidateMiddleware");
 const { signupSchema } = require("../validations/signupValidation");
 const { loginSchema } = require("../validations/loginValidation");
 
+
 //authMiddleware
 
 //Routes using RouterHelper
 RouteHelper.resource(router, "health", HealthController);
 RouteHelper.resource(router, "lookups", LookupController);
-RouteHelper.resource(router, "signup", SignupController, validate(signupSchema));
+RouteHelper.resource(
+  router,
+  "signup",
+  SignupController,
+  validate(signupSchema)
+);
 RouteHelper.resource(router, "login", LoginController, validate(loginSchema));
-RouteHelper.resource(router, "users", UserController);
+RouteHelper.resource(
+  router,
+  "users",
+  UserController,
+  AuthMiddleware.verify(["ADMIN", "USER"])
+);
 RouteHelper.resource(router, "subordinates", SubordinateControllers);
 RouteHelper.resource(router, "metrics", MetricController);
 

@@ -116,8 +116,7 @@ module.exports.RouteHelper = {
             if (response) {
               return res.json(response);
             } else if (typeof response !== "undefined") {
-              res.json(null);
-              return;
+              return res.json(null);
             }
           } catch (e) {
             next(e);

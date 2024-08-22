@@ -10,17 +10,17 @@ module.exports.LoginService = {
   loginUser: async (officialEmail, password) => {
     try {
       // Check if user exists
-      const user = await getRecordByKey(TABLE_NAMES.USERS,{officialEmail});
-      
+      const user = await getRecordByKey(TABLE_NAMES.USERS, { officialEmail });
+
       if (!user) throw new Error("User not found");
       //check if passowrd matches
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) throw new Error("Invalid credentials");
 
       // Generate a token
-      const authToken = AuthService.createToken(user.id);
+      const authToken = AuthService.createToken(user.id, user.role);
 
-      return  ApiResponse("success",{
+      return ApiResponse("success", {
         token: authToken,
         userId: user._id,
         firstName: user.firstName,
@@ -31,6 +31,7 @@ module.exports.LoginService = {
         alternateContactNumber: user.alternateContactNumber,
         birthday: user.birthday,
         bloodGroup: user.bloodGroup,
+        role: user.role,
       });
     } catch (error) {
       throw new AccessDeniedError(error);
