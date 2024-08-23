@@ -11,9 +11,6 @@ module.exports.SignupService = {
     try {
       const user = await insertRecord(TABLE_NAMES.USERS, userData);
 
-      console.log("Inside signupservice");
-      console.log(user);
-
       if (!user._id) {
         throw new Error("Error registering user:");
       }
@@ -22,7 +19,7 @@ module.exports.SignupService = {
 
       return ApiResponse("success", {
         token: authToken,
-        userId: user._id,
+        _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         officialEmail: user.officialEmail,

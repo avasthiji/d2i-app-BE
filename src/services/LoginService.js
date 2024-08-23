@@ -22,7 +22,7 @@ module.exports.LoginService = {
 
       return ApiResponse("success", {
         token: authToken,
-        userId: user._id,
+        _id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         officialEmail: user.officialEmail,
