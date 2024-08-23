@@ -16,6 +16,7 @@ const AuthMiddleware = require("../middlewares/AuthMiddlewares");
 const validate = require("../middlewares/ValidateMiddleware");
 const { signupSchema } = require("../validations/signupValidation");
 const { loginSchema } = require("../validations/loginValidation");
+const MeController = require("../controllers/MeController");
 
 
 //authMiddleware
@@ -45,5 +46,7 @@ RouteHelper.resource(
   RewardController,
   AuthMiddleware.verify
 );
+
+RouteHelper.resource(router,"me",MeController,AuthMiddleware.verify());
 
 module.exports.router = router;
