@@ -33,6 +33,22 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Pre-update hook to hash the password
+userSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+
+  if (update.password) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      update.password = await bcrypt.hash(update.password, salt);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  next();
+});
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

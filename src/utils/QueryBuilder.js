@@ -1,7 +1,8 @@
 const users = require('../models/User');
 const updateRecordsByKey = async function (TABLENAME, filter, update) {
   try {
-    return await TABLENAME.findOneAndUpdate(filter, update, {new: true});
+    const updatedData = await TABLENAME.findOneAndUpdate(filter, update, {new: true});
+    return updatedData;
   } catch (error) {
     return error.message;
   }
@@ -9,21 +10,24 @@ const updateRecordsByKey = async function (TABLENAME, filter, update) {
 
 const deleteRecordsById = async function (TABLENAME, id) {
   try {
-    return await TABLENAME.findByIdAndDelete(id);
+    const response = await TABLENAME.findByIdAndDelete(id);
+    return response;
   } catch (error) {
     return error.message;
   }
 };
 const getRecordByKey = async function (TABLENAME, filter) {
   try {
-    return await TABLENAME.findOne(filter);
+    const record= await TABLENAME.findOne(filter);
+    return record;
   } catch (error) {
     return error.message;
   }
 };
 const getRecordsByKey = async function (TABLENAME, filter) {
   try {
-    return await TABLENAME.find(filter);
+    const records= await TABLENAME.find(filter);
+    return records;
   } catch (error) {
     return error.message;
   }
