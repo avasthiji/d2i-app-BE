@@ -15,14 +15,21 @@ module.exports = {
     try {
       const userId = req.params.me_id;
       const updatedData = req.body;
-      if (userId === req.auth.userId) {
-        const updatedUser = await UserService.updateUser(userId, updatedData);
-        if (!updatedUser) {
-          res.status(404).json({ message: "User not found" });
-        }
-        res.status(200).json(updatedUser);
+
+      if (updatedData.role) {
+        res
+          .status(403)
+          .json({ message: "Access denied can't modify ROLE" });
       } else {
-        res.status(403).json({ message: "Access denied" });
+        if (userId === req.auth.userId) {
+          const updatedUser = await UserService.updateUser(userId, updatedData);
+          if (!updatedUser) {
+            res.status(404).json({ message: "User not found" });
+          }
+          res.status(200).json(updatedUser);
+        } else {
+          res.status(403).json({ message: "Access denied" });
+        }
       }
     } catch (error) {
       console.log(error);

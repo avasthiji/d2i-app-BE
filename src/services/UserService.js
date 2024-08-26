@@ -12,7 +12,7 @@ const {
 module.exports.UserService = {
   getAllUsers: async () => {
     try {
-      const users = await getRecordsByKey(TABLE_NAMES.USERS, {});
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, {isActive: true});
 
       return users;
     } catch (error) {
@@ -21,7 +21,7 @@ module.exports.UserService = {
   },
   getUserByID: async (userId) => {
     try {
-      const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
+      const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId});
 
       if (!user) {
         throw new Error("User not Found");
@@ -34,13 +34,15 @@ module.exports.UserService = {
   },
   createUser: async (userData) => {
     try {
-      return await insertRecord(User, userData);
+      const response = await insertRecord(User, userData);
+      return response;
     } catch (error) {
       throw new Error("Error creating user:" + error.message);
     }
   },
   updateUser: async (userId, updateData) => {
     try {
+    
       let updatedData = await updateRecordsByKey(
         TABLE_NAMES.USERS,
         { _id: userId },
@@ -53,9 +55,18 @@ module.exports.UserService = {
   },
   deleteUser: async (userId) => {
     try {
-      return await deleteRecordsById(TABLE_NAMES.USERS, { _id: userId });
+      const response = await deleteRecordsById(TABLE_NAMES.USERS, { _id: userId });
+      return response;
     } catch (error) {
       throw new Error("Error deleting user" + error.message);
     }
   },
+  softDeleteUser: async(userId)=>{
+    try{
+      const response = await updateRecordsByKey(TABLE_NAMES.USERS,{_id:userId},{isActive: false});
+      return response;
+    }catch(error){
+      throw new Error("Error Soft Deleting user"+error.message);
+    }
+  }
 };

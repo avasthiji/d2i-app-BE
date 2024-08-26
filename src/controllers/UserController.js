@@ -72,7 +72,8 @@ module.exports = {
 
       const { is_admin } = req.auth;
       if (is_admin) {
-        const deletedUser = await UserService.deleteUser(userId);
+        // const deletedUser = await UserService.deleteUser(userId);
+        const deletedUser = await UserService.softDeleteUser(userId);
         if (!deletedUser) {
           res.status(404).josn({ message: "User not found" });
         }
