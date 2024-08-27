@@ -1,8 +1,14 @@
-const { NotFoundError } = require('../exceptions');
-const Metric = require('../models/Metric');
-const { ApiResponse } = require('../utils/ApiHelper');
-const { TABLE_NAMES } = require('../utils/db');
-const { getRecordByKey, updateRecordsByKey, deleteRecordsById, getRecordsByKey, insertRecord } = require('../utils/QueryBuilder');
+const { NotFoundError } = require("../exceptions");
+const Metric = require("../models/Metric");
+const { ApiResponse } = require("../utils/ApiHelper");
+const { TABLE_NAMES } = require("../utils/db");
+const {
+  getRecordByKey,
+  updateRecordsByKey,
+  deleteRecordsById,
+  getRecordsByKey,
+  insertRecord,
+} = require("../utils/QueryBuilder");
 
 module.exports.MetricService = {
   createMetric: async (metricData) => {
@@ -67,7 +73,7 @@ module.exports.MetricService = {
       });
 
       if (!parentMetrics || parentMetrics.length === 0) {
-        return ApiResponse("success",[]);
+        return ApiResponse("success", []);
       }
 
       return ApiResponse("success", parentMetrics);
@@ -93,22 +99,25 @@ module.exports.MetricService = {
   //   }
   // },
   getChildMetricsByParentId: async (metricId) => {
-    
     try {
-     const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {_id:metricId});
+      const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {
+        _id: metricId,
+      });
 
-     if(!parentMetric){
-      throw new Error("metric not found");
-     }
-     const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {parent_id:metricId});
-     
-     if (!childMetrics) {
-       throw new Error("metric not found");
-     }
-     const result = {
-      ...parentMetric._doc,
-      sub_metrics:childMetrics
-     };
+      if (!parentMetric) {
+        throw new Error("metric not found");
+      }
+      const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
+        parent_id: metricId,
+      });
+
+      if (!childMetrics) {
+        throw new Error("metric not found");
+      }
+      const result = {
+        ...parentMetric._doc,
+        sub_metrics: childMetrics,
+      };
 
       return ApiResponse("success", result);
     } catch (error) {

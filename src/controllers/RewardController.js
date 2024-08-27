@@ -20,4 +20,15 @@ module.exports = {
       next(error);
     }
   },
+  show: async (req, res, next) => {
+    try {
+      const userId = req.auth.userId;
+      const data = await RewardService.getRewardsById(userId);
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
 };

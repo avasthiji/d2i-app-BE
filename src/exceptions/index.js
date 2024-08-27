@@ -1,8 +1,8 @@
 module.exports.ValidationError = function (errors = {}) {
   // errors ex. {"email": "email is not unique"}
-  this.message = "validation errors occurred.";
+  this.message = `${errors || "validation errors occurred."}`;
   this.code = 422;
-  this.errors = errors;
+  // this.errors = errors;
 };
 
 module.exports.UnauthorizedError = function () {
@@ -21,11 +21,10 @@ module.exports.NotFoundError = function (errors = {}) {
 };
 
 module.exports.DuplicateEntry = function (errors = {}) {
-  this.message =errors.message;
+  this.message = errors.message;
   this.code = 429;
   this.errors = errors;
 };
-
 
 module.exports.Exceptions = {
   throwGlobalValidationException: (message) => {

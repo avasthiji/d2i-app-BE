@@ -27,7 +27,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1", router);
 
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(new NotFoundError());
@@ -44,16 +43,21 @@ app.use(function (err, req, res, next) {
       message: err?.message || "Unauthorized",
     });
   } else if (err instanceof ValidationError) {
-    return res
-      .status(422)
-      .json(err?.errors || { global: "Validation errors occurred" });
+    return res.status(422).json({
+      message: err?.message || "Validation Error message",
+      code: err?.code,
+    });
   } else if (err instanceof AccessDeniedError) {
-    return res.status(403).json({message:err?.message || 'Access denied message',code: err?.code});
+    return res.status(403).json({
+      message: err?.message || "Access denied message",
+      code: err?.code,
+    });
   } else if (err instanceof NotFoundError) {
-    return res.status(404).json({message:err?.message || 'Not found message',code: err?.code});
+    return res
+      .status(404)
+      .json({ message: err?.message || "Not found message", code: err?.code });
   } else if (err instanceof DuplicateEntry) {
-        return res.status(429).json(err);
-
+    return res.status(429).json(err);
   }
 
   if (err instanceof Error) {

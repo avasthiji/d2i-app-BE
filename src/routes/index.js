@@ -44,7 +44,7 @@ RouteHelper.resource(
   router,
   "rewards",
   RewardController,
-  AuthMiddleware.verify
+  AuthMiddleware.verify()
 );
 
 RouteHelper.resource(router, "me", MeController, AuthMiddleware.verify());

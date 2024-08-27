@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const AuthService = require("./AuthService");
 const { ApiResponse } = require("../utils/ApiHelper");
-const { AccessDeniedError } = require("../exceptions");
+const { AccessDeniedError, ValidationError } = require("../exceptions");
 const { TABLE_NAMES } = require("../utils/db");
 const { getRecordByKey } = require("../utils/QueryBuilder");
 
@@ -34,7 +34,7 @@ module.exports.LoginService = {
         role: user.role,
       });
     } catch (error) {
-      throw new AccessDeniedError(error.message);
+      throw new ValidationError(error.message);
     }
   },
 };
