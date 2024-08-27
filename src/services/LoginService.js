@@ -34,8 +34,7 @@ module.exports.LoginService = {
         role: user.role,
       });
     } catch (error) {
-      throw new AccessDeniedError(error);
-      // throw new Error({"message":error});
+      throw new AccessDeniedError(error.message);
     }
   },
 };

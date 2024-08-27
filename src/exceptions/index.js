@@ -11,14 +11,13 @@ module.exports.UnauthorizedError = function () {
 };
 
 module.exports.AccessDeniedError = function (message = "") {
-  this.message = `Access Denied -> ${message || "Not allowed."}`;
+  this.message = `${message || "Not allowed."}`;
   this.code = 403;
 };
 
 module.exports.NotFoundError = function (errors = {}) {
   this.message = "Not Found";
   this.code = 404;
-  this.errors = errors;
 };
 
 module.exports.DuplicateEntry = function (errors = {}) {

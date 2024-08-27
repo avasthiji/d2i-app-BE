@@ -48,7 +48,7 @@ app.use(function (err, req, res, next) {
       .status(422)
       .json(err?.errors || { global: "Validation errors occurred" });
   } else if (err instanceof AccessDeniedError) {
-    return res.status(403).json(err?.message);
+    return res.status(403).json({message:err?.message || 'Access denied message',code: err?.code});
   } else if (err instanceof NotFoundError) {
     return res.status(404).send("Not Found");
   } else if (err instanceof DuplicateEntry) {
