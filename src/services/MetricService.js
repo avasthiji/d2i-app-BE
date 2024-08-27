@@ -1,3 +1,4 @@
+const { NotFoundError } = require('../exceptions');
 const Metric = require('../models/Metric');
 const { ApiResponse } = require('../utils/ApiHelper');
 const { TABLE_NAMES } = require('../utils/db');
@@ -66,7 +67,7 @@ module.exports.MetricService = {
       });
 
       if (!parentMetrics || parentMetrics.length === 0) {
-        throw new Error("No parent metrics found");
+        return ApiResponse("success",[]);
       }
 
       return ApiResponse("success", parentMetrics);
@@ -111,7 +112,7 @@ module.exports.MetricService = {
 
       return ApiResponse("success", result);
     } catch (error) {
-      throw new Error("Error fetching child metrics: " + error.message);
+      throw new NotFoundError(error.message);
     }
   },
 };

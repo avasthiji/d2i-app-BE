@@ -4,7 +4,8 @@ module.exports = {
   //index
   index: async (req, res, next) => {
     try {
-      const data = await UserService.getAllUsers(); //service method to get all users
+       const currentUserId = req.auth.userId;
+      const data = await UserService.getAllUsers(currentUserId); //service method to get all users accept itself
       res.status(200).json(data);
     } catch (error) {
       console.log(error);

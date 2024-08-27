@@ -10,11 +10,11 @@ const {
 } = require("../utils/QueryBuilder");
 
 module.exports.UserService = {
-  getAllUsers: async () => {
+  getAllUsers: async (currentUserId) => {
     try {
       const users = await getRecordsByKey(TABLE_NAMES.USERS, {isActive: true});
-
-      return users;
+      const filteredUsers = users.filter(user => user._id.toString() !== currentUserId.toString());
+      return filteredUsers;
     } catch (error) {
       throw new Error("Error fetching users: " + error.message);
     }

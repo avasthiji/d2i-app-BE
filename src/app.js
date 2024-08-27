@@ -50,7 +50,7 @@ app.use(function (err, req, res, next) {
   } else if (err instanceof AccessDeniedError) {
     return res.status(403).json({message:err?.message || 'Access denied message',code: err?.code});
   } else if (err instanceof NotFoundError) {
-    return res.status(404).send("Not Found");
+    return res.status(404).json({message:err?.message || 'Not found message',code: err?.code});
   } else if (err instanceof DuplicateEntry) {
         return res.status(429).json(err);
 
