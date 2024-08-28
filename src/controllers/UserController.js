@@ -5,7 +5,13 @@ module.exports = {
   index: async (req, res, next) => {
     try {
        const currentUserId = req.auth.userId;
-      const data = await UserService.getAllUsers(currentUserId); //service method to get all users accept itself
+       const query = req.query.query;
+       let data;
+       if(query){
+        data = await UserService.searchUsers(query,currentUserId);
+       }else{
+        data = await UserService.getAllUsers(currentUserId); //service method to get all users accept itself
+        }
       res.status(200).json(data);
     } catch (error) {
       console.log(error);

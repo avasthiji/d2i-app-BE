@@ -68,5 +68,32 @@ module.exports.UserService = {
     }catch(error){
       throw new Error("Error Soft Deleting user"+error.message);
     }
+  },
+  searchUsers: async(query,currentUserId)=>{
+    try{
+       const searchQuery = {
+         $and: [
+           { _id: { $ne: currentUserId } }, // Exclude current user
+           {
+             $or: [
+               { firstName: { $regex: query, $options: "i" } },
+               { lastName: { $regex: query, $options: "i" } },
+               { officialEmail: { $regex: query, $options: "i" } },
+             ],
+           },
+         ],
+         isActive: true, // for non-deleted user only
+       };
+
+        const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery);
+
+       if (!users.length) {
+        throw new Error("No users found matching the query.");
+      }
+      return users;
+    }catch(error){
+      throw new NotFoundError(error.message);
+
+    }
   }
 };
