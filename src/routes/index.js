@@ -37,16 +37,20 @@ RouteHelper.resource(
   AuthMiddleware.verify(["ADMIN", "USER"])
 );
 RouteHelper.resource(router, "subordinates", SubordinateControllers);
-RouteHelper.resource(router, "metrics", MetricController);
+RouteHelper.resource(
+  router,
+  "metrics",
+  MetricController,
+  AuthMiddleware.verify()
+);
 
 RouteHelper.resource(
   router,
   "rewards",
   RewardController,
-  AuthMiddleware.verify()
+  AuthMiddleware.verify(["ADMIN", "USER"])
 );
 
 RouteHelper.resource(router, "me", MeController, AuthMiddleware.verify());
-
 
 module.exports.router = router;

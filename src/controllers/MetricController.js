@@ -1,7 +1,6 @@
 const { MetricService } = require("../services/MetricService");
 
 module.exports = {
-
   index: async (req, res, next) => {
     try {
       const data = await MetricService.getParentMetrics();
@@ -32,9 +31,14 @@ module.exports = {
   //create
   create: async (req, res, next) => {
     try {
-      const metricData = req.body;
-      const newMetric = await MetricService.createMetric(metricData);
-      res.status(201).json(newMetric);
+      const metricData = req.body;      
+      const { is_admin } = req.auth;
+      if (is_admin) {
+        const newMetric = await MetricService.createMetric(metricData);
+        res.status(201).json(newMetric);
+      } else {
+        res.status(403).json({ message: "Access denied" });
+      }
     } catch (error) {
       console.log(error);
       next(error);
