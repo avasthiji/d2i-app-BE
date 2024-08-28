@@ -36,7 +36,7 @@ RouteHelper.resource(
   UserController,
   AuthMiddleware.verify(["ADMIN", "USER"])
 );
-RouteHelper.resource(router, "subordinates", SubordinateControllers);
+RouteHelper.resource(router, "subordinates", SubordinateControllers,AuthMiddleware.verify());
 RouteHelper.resource(
   router,
   "metrics",
