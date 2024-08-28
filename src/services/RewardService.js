@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { NotFoundError } = require("../exceptions");
 const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
@@ -6,7 +7,10 @@ const {
   getRecordByKey,
   insertRecord,
   getRecordsByKey,
+  runAggregation,
 } = require("../utils/QueryBuilder");
+const User = require("../models/User");
+const Reward = require("../models/Reward");
 
 module.exports.RewardService = {
   assignReward: async (user_id, metric_id, points, comment, submittedBy) => {
@@ -39,13 +43,49 @@ module.exports.RewardService = {
   },
   getRewardsById: async (userId) => {
     try {
-      const rewards = await getRecordsByKey(TABLE_NAMES.REWARDS, {
-        user_id: userId,
-      });
+      const rewards = await Reward.aggregate([
+        {
+          $match: { user_id: new mongoose.Types.ObjectId(userId) },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "submitted_by",
+            foreignField: "_id",
+            as: "submittedByInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$submittedByInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            submittedByName: {
+              $concat: [
+                "$submittedByInfo.firstName",
+                " ",
+                "$submittedByInfo.lastName",
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            metric_id: 1,
+            user_id: 1,
+            points: 1,
+            comment: 1,
+            submitted_by: 1,
+            created_at: 1,
+            submittedByName: 1,
+          },
+        },
+      ]);
 
-      // if(!rewards || rewards.length === 0){
-      //   return { message: "No rewards found for this user" };
-      // }
       if (!rewards || rewards.length === 0) {
         return ApiResponse("success", []);
       }
