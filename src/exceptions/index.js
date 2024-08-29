@@ -16,7 +16,7 @@ module.exports.AccessDeniedError = function (message = "") {
 };
 
 module.exports.NotFoundError = function (errors = {}) {
-  this.message = "Not Found";
+  this.message = `${errors || "Not Found"}`;
   this.code = 404;
 };
 
