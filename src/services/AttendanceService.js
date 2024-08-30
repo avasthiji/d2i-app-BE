@@ -73,4 +73,53 @@ module.exports.AttendanceService = {
       throw new NotFoundError(error.message);
     }
   },
+
+  getAllRecords: async (date) => {
+    try {
+      let attendance = await getRecordByKey(TABLE_NAMES.ATTENDANCE, {
+        attendanceDate: date,
+      });
+      if (!attendance) {
+        throw new NotFoundError(
+          "Attendance record not found for the given date."
+        );
+      }
+      return attendance;
+    } catch (error) {
+      throw new NotFoundError(error.message);
+    }
+  },
+
+  getMyAttendanceDetails: async (date, user_id) => {
+    try {
+      let attendance = await getRecordByKey(TABLE_NAMES.ATTENDANCE, {
+        attendanceDate: date,
+      });
+
+      if (!attendance) {
+        throw new NotFoundError(
+          "Attendance record not found for the given date."
+        );
+      }
+
+      // Find the attendance details for the logged-in user
+      const employeeRecord = attendance.employees.find(
+        (employee) => employee.user_id.toString() === user_id
+      );
+
+      if (!employeeRecord) {
+        throw new NotFoundError(
+          "Attendance record not found for the user on the given date."
+        );
+      }
+
+      // Return the user's attendance details
+      return {
+        attendanceDate: attendance.attendanceDate,
+        ...employeeRecord._doc, // This will return all fields within the employee record
+      };
+    } catch (error) {
+      throw new NotFoundError(error.message);
+    }
+  },
 };
