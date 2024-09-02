@@ -73,10 +73,6 @@ module.exports = {
       if (file) {
         //file path for old image
         const oldImagePath = path.join(existingUser.userProfile);
-        console.log('logging old image path');
-        console.log(oldImagePath);
-        console.log(fs.existsSync(oldImagePath));
-        
         
         //check if an old image exists and delete it
         if(fs.existsSync(oldImagePath)){
