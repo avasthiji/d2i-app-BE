@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   birthday: { type: Date, required: true },
   password: { type: String, required: true },
   isActive: { type: Boolean, default: true },
+  userProfile: {type: String, default:null},
   parent_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

@@ -1,17 +1,20 @@
+const path = require("path");
+const fs = require("fs");
+
 const { UserService } = require("../services/UserService");
 
 module.exports = {
   //index
   index: async (req, res, next) => {
     try {
-       const currentUserId = req.auth.userId;
-       const query = req.query.query;
-       let data;
-       if(query){
-        data = await UserService.searchUsers(query,currentUserId);
-       }else{
+      const currentUserId = req.auth.userId;
+      const query = req.query.query;
+      let data;
+      if (query) {
+        data = await UserService.searchUsers(query, currentUserId);
+      } else {
         data = await UserService.getAllUsers(currentUserId); //service method to get all users accept itself
-        }
+      }
       res.status(200).json(data);
     } catch (error) {
       console.log(error);
@@ -37,6 +40,10 @@ module.exports = {
     try {
       const userData = req.body;
       const { is_admin } = req.auth;
+
+      if (req.file) {
+        userData.userProfile = req.file.path;
+      }
       if (is_admin) {
         const newUser = await UserService.createUser(userData);
         res.status(201).json(newUser);
@@ -52,8 +59,33 @@ module.exports = {
   //update
   update: async (req, res, next) => {
     try {
+      const {file} =req;
       const userId = req.params.users_id;
       const updateData = req.body;
+
+      const existingUser = await UserService.getUserByID(userId);
+
+      if(!existingUser){
+        return res.status(404).json({message:'User not found'});
+      }
+
+      //if file was uploaded, add it to file path of updated data
+      if (file) {
+        //file path for old image
+        const oldImagePath = path.join(existingUser.userProfile);
+        console.log('logging old image path');
+        console.log(oldImagePath);
+        console.log(fs.existsSync(oldImagePath));
+        
+        
+        //check if an old image exists and delete it
+        if(fs.existsSync(oldImagePath)){
+          fs.unlinkSync(oldImagePath);
+        }
+
+        //saving new file path
+        updateData.userProfile = req.file.path;
+      }
 
       const { is_admin } = req.auth;
 

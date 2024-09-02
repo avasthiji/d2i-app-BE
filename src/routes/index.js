@@ -17,6 +17,7 @@ const validate = require("../middlewares/ValidateMiddleware");
 const { signupSchema } = require("../validations/signupValidation");
 const { loginSchema } = require("../validations/loginValidation");
 const MeController = require("../controllers/MeController");
+const upload = require("../middlewares/MulterMiddleware");
 
 //authMiddleware
 
@@ -34,7 +35,8 @@ RouteHelper.resource(
   router,
   "users",
   UserController,
-  AuthMiddleware.verify(["ADMIN", "USER"])
+  AuthMiddleware.verify(["ADMIN", "USER"]),
+  upload
 );
 RouteHelper.resource(router, "subordinates", SubordinateControllers,AuthMiddleware.verify());
 RouteHelper.resource(
@@ -51,6 +53,6 @@ RouteHelper.resource(
   AuthMiddleware.verify(["ADMIN", "USER"])
 );
 
-RouteHelper.resource(router, "me", MeController, AuthMiddleware.verify());
+RouteHelper.resource(router, "me", MeController, AuthMiddleware.verify(),upload);
 
 module.exports.router = router;

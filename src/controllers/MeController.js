@@ -16,6 +16,10 @@ module.exports = {
       const userId = req.params.me_id;
       const updatedData = req.body;
 
+       if (req.file) {
+         updatedData.userProfile = req.file.path;
+       }
+
       if (updatedData.role) {
         res
           .status(403)
