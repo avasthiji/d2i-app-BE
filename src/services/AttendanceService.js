@@ -12,6 +12,7 @@ module.exports.AttendanceService = {
       if (!attendance) {
         attendance = await insertRecord(TABLE_NAMES.ATTENDANCE, {
           attendanceDate: date,
+          employees:[]
         });
       }
 
@@ -24,16 +25,27 @@ module.exports.AttendanceService = {
           "Attendance record already exists for this user on this date."
         );
       }
+      
+
+      const newEmployeeRecord = {
+        user_id,
+        punchInTime: new Date(),
+        punchOutTime:null,
+        workingDuration:0,
+        timesheet:null,
+        isOnLeave:false
+      };
 
       // Add the user to the attendance record
-      attendance.employees.push({
-        user_id,
-        isOnLeave: false,
-        punchInTime: new Date(),
-      });
+      attendance.employees.push(newEmployeeRecord);
       await attendance.save();
 
-      return attendance;
+      return {
+        attendanceDate:attendance.attendanceDate,
+        employees:[
+          newEmployeeRecord
+        ]
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }
@@ -45,7 +57,7 @@ module.exports.AttendanceService = {
         attendanceDate: date,
       });
       if (!attendance) {
-        throw new NotFoundError(
+        throw new Error(
           "Attendance record not found for the given date."
         );
       }
@@ -68,7 +80,10 @@ module.exports.AttendanceService = {
 
       await attendance.save();
 
-      return attendance;
+      return {
+        attendanceDate:attendance.attendanceDate,
+        employees:[employeeRecord],
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }

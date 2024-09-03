@@ -2,10 +2,15 @@ const { AttendanceService } = require("../services/AttendanceService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
-  //punchIn
+  //punchIn and punchout
   create: async (req, res, next) => {
     try {
-      let { attendanceDate } = req.body;
+      let { attendanceDate, action } = req.body;
+      if (!action) {
+        return res
+          .status(400)
+          .json({ message: "Action is required(punchIn or punchOut)" });
+      }
       if (attendanceDate) {
         attendanceDate = new Date(attendanceDate);
       }
@@ -27,56 +32,54 @@ module.exports = {
           );
 
       const user_id = req.auth.userId;
-      const attendance = await AttendanceService.punchIn(date, user_id);
+      let attendance;
+      if (action === "punchIn") {
+        attendance = await AttendanceService.punchIn(date, user_id);
+      } else if (action === "punchOut") {
+        attendance = await AttendanceService.punchOut(date, user_id);
+      } else {
+        return res.status(400).json({ message: "Invalid Action specified." });
+      }
       res.json(ApiResponse("success", attendance));
     } catch (error) {
       next(error);
     }
   },
-  //punchOut
-  update: async (req, res, next) => {
+
+  show: async (req, res, next) => {
     try {
-      let { attendanceDate } = req.body;
-      if (attendanceDate) {
-        attendanceDate = new Date(attendanceDate);
-      }
-      const date = attendanceDate
-        ? new Date(
-            Date.UTC(
-              attendanceDate.getFullYear(),
-              attendanceDate.getMonth(),
-              attendanceDate.getDate()
-            )
-          )
-        : new Date(
-            Date.UTC(
-              new Date().getFullYear(),
-              new Date().getMonth(),
-              new Date().getDate()
-            )
+      const userId = req.params.attendance_id;
+
+      const loggedInuserId = req.auth.userId;
+
+      if (userId !== loggedInuserId) {
+        return res
+          .status(403)
+          .json(
+            ApiResponse("error", "You are not authorized to access this data.")
           );
-      const user_id = req.auth.userId;
-      const attendance = await AttendanceService.punchOut(date, user_id);
-      res.json(ApiResponse("success", attendance));
+      }
+      // const { attendanceDate: date } = req.body;
+      //  if (date) {
+      //    date = new Date(date);
+      //  }
+      const date = new Date(
+        Date.UTC(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          new Date().getDate()
+        )
+      );
+
+      const attendanceDetails = await AttendanceService.getMyAttendanceDetails(
+        date,
+        loggedInuserId
+      );
+      res.json(ApiResponse("success", attendanceDetails));
     } catch (error) {
       next(error);
     }
   },
-
-  // show: async (req, res, next) => {
-  //   try {
-  //     const { attendanceDate: date } = req.query;
-  //     const user_id = req.auth.userId;
-
-  //     const attendanceDetails = await AttendanceService.getMyAttendanceDetails(
-  //       date,
-  //       user_id
-  //     );
-  //     res.json(ApiResponse("success", attendanceDetails));
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // },
 
   index: async (req, res, next) => {
     try {
