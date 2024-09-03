@@ -41,9 +41,6 @@ module.exports = {
       const userData = req.body;
       const { is_admin } = req.auth;
 
-      if (req.file) {   
-        userData.userProfile = req.file.filename;
-      }
       if (is_admin) {
         const newUser = await UserService.createUser(userData);
         res.status(201).json(newUser);
