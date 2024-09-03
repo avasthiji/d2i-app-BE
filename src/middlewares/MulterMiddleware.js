@@ -13,7 +13,6 @@ const storage = multer.diskStorage({
     cb(null, uploadDir); //path to save uploaded images
   },
   filename: function (req, file, cb) {
-    console.log(req.params);
     let filename;
     if (req.params.me_id) {
       filename = req.params.me_id + path.extname(file.originalname);
