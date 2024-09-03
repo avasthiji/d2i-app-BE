@@ -41,8 +41,8 @@ module.exports = {
       const userData = req.body;
       const { is_admin } = req.auth;
 
-      if (req.file) {
-        userData.userProfile = req.file.path;
+      if (req.file) {   
+        userData.userProfile = req.file.filename;
       }
       if (is_admin) {
         const newUser = await UserService.createUser(userData);
@@ -72,15 +72,14 @@ module.exports = {
       //if file was uploaded, add it to file path of updated data
       if (file) {
         //file path for old image
-        const oldImagePath = path.join(existingUser.userProfile);
-        
+        const oldImagePath = path.join(existingUser.userProfile); 
         //check if an old image exists and delete it
         if(fs.existsSync(oldImagePath)){
           fs.unlinkSync(oldImagePath);
         }
 
         //saving new file path
-        updateData.userProfile = req.file.path;
+        updateData.userProfile = req.file.filename;
       }
 
       const { is_admin } = req.auth;

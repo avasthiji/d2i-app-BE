@@ -34,7 +34,7 @@ module.exports = {
         }
 
         //saving new file path
-        updatedData.userProfile = req.file.path;
+        updatedData.userProfile = req.file.filename;
       }
 
       if (updatedData.role) {
