@@ -37,7 +37,7 @@ const insertRecord = async function (TABLENAME, insertObj) {
     const record = await TABLENAME.create(insertObj);
     return record;
   } catch (error) {
-    return error.message;
+    throw error;
   }
 };
 

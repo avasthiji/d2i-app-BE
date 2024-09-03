@@ -51,6 +51,9 @@ module.exports = {
         res.status(403).json({ message: "Access denied" });
       }
     } catch (error) {
+      if(error.code===11000){
+        return res.status(400).json({message: 'A user with this email already exists.'});
+      }
       console.log(error);
       next(error);
     }

@@ -37,7 +37,7 @@ module.exports.UserService = {
       const response = await insertRecord(User, userData);
       return response;
     } catch (error) {
-      throw new Error("Error creating user:" + error.message);
+      throw error;
     }
   },
   updateUser: async (userId, updateData) => {
