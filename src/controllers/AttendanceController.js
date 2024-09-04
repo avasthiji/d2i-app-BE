@@ -85,7 +85,9 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
       if (is_admin) {
-        const { attendanceDate: date } = req.body;
+        
+        const {attendanceDate:date}  = req.query;
+        
         const attendanceRecord = await AttendanceService.getAllRecords(date);
         res.json(ApiResponse("success", attendanceRecord));
       } else {
