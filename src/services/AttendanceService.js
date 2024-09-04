@@ -95,9 +95,7 @@ module.exports.AttendanceService = {
         attendanceDate: date,
       });
       if (!attendance) {
-        throw new NotFoundError(
-          "Attendance record not found for the given date."
-        );
+        return null;
       }
       return attendance;
     } catch (error) {
@@ -112,9 +110,7 @@ module.exports.AttendanceService = {
       });
 
       if (!attendance) {
-        throw new NotFoundError(
-          "Attendance record not found for the given date."
-        );
+        return null;
       }
 
       // Find the attendance details for the logged-in user
@@ -123,9 +119,7 @@ module.exports.AttendanceService = {
       );
 
       if (!employeeRecord) {
-        throw new NotFoundError(
-          "Attendance record not found for the user on the given date."
-        );
+        return null;
       }
 
       // Return the user's attendance details

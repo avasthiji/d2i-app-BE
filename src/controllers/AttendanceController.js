@@ -59,23 +59,27 @@ module.exports = {
             ApiResponse("error", "You are not authorized to access this data.")
           );
       }
-      // const { attendanceDate: date } = req.body;
-      //  if (date) {
-      //    date = new Date(date);
-      //  }
-      const date = new Date(
-        Date.UTC(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        )
-      );
+      
+      let {attendanceDate: date} = req.query;
+      if(date){
+        date = new Date(Date.UTC(new Date(date).getFullYear(), new Date(date).getMonth(), new Date(date).getDate()));
+      }else{
+        date = new Date(
+         Date.UTC(
+           new Date().getFullYear(),
+           new Date().getMonth(),
+           new Date().getDate()
+         )
+        );
+      }
 
       const attendanceDetails = await AttendanceService.getMyAttendanceDetails(
         date,
         loggedInuserId
       );
-      res.json(ApiResponse("success", attendanceDetails));
+
+        res.json(ApiResponse("success", attendanceDetails || null));
+      
     } catch (error) {
       next(error);
     }
@@ -89,7 +93,7 @@ module.exports = {
         const {attendanceDate:date}  = req.query;
         
         const attendanceRecord = await AttendanceService.getAllRecords(date);
-        res.json(ApiResponse("success", attendanceRecord));
+        res.json(ApiResponse("success", attendanceRecord || null));
       } else {
         res.status(403).json({ message: "Access denied" });
       }
