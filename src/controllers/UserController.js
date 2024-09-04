@@ -1,7 +1,9 @@
 const path = require("path");
 const fs = require("fs");
-
+// const {CONSTANST} = require('../constants/index');
 const { UserService } = require("../services/UserService");
+const transporter = require("../utils/Mailer");
+const CONSTANTS = require("../constants");
 
 module.exports = {
   //index
@@ -43,13 +45,31 @@ module.exports = {
 
       if (is_admin) {
         const newUser = await UserService.createUser(userData);
+
+        const loginLink = CONSTANTS.LOGIN_URL;
+
+        const mailOptions = {
+          from: process.env.EMAIL_FROM,
+          to: newUser.officialEmail,
+          subject: "Your Account Has Been Created",
+          html: `<p>Hello ${newUser.firstName},</p>
+                 <p>Your account has been created by the admin. You can log in with the following credentials:</p>
+                 <p><strong>Email:</strong> ${newUser.officialEmail}</p>
+                 <p><strong>Password:</strong> ${userData.password}</p>
+                 <p>Please click the link below to log in and update your information:</p>
+                 <a href="${loginLink}">Login</a>`,
+        };
+        await transporter.sendMail(mailOptions);
+
         res.status(201).json(newUser);
       } else {
         res.status(403).json({ message: "Access denied" });
       }
     } catch (error) {
-      if(error.code===11000){
-        return res.status(400).json({message: 'A user with this email already exists.'});
+      if (error.code === 11000) {
+        return res
+          .status(400)
+          .json({ message: "A user with this email already exists." });
       }
       console.log(error);
       next(error);
@@ -59,22 +79,22 @@ module.exports = {
   //update
   update: async (req, res, next) => {
     try {
-      const {file} =req;
+      const { file } = req;
       const userId = req.params.users_id;
       const updateData = req.body;
 
       const existingUser = await UserService.getUserByID(userId);
 
-      if(!existingUser){
-        return res.status(404).json({message:'User not found'});
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       //if file was uploaded, add it to file path of updated data
       if (file) {
         //file path for old image
-        const oldImagePath = path.join(existingUser.userProfile); 
+        const oldImagePath = existingUser.userProfile;
         //check if an old image exists and delete it
-        if(fs.existsSync(oldImagePath)){
+        if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
 

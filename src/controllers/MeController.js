@@ -19,14 +19,14 @@ module.exports = {
       const userId = req.params.me_id;
       const updatedData = req.body;
 
-      const existingUser = await UserService.getUserByID(userId);
+      const existingUser = await UserService.getUserByID(userId);    
       if (!existingUser) {
         return res.status(404).json({ message: "User not found" });
       }
       //if file was uploaded, add it to file path of updated data
       if (file) {
         //file path for old image
-        const oldImagePath = path.join(existingUser.userProfile);
+        const oldImagePath = existingUser.userProfile;
 
         //check if an old image exists and delete it
         if (fs.existsSync(oldImagePath)) {
