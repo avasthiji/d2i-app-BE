@@ -4,6 +4,7 @@ const fs = require("fs");
 const { UserService } = require("../services/UserService");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
+const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
   //index
@@ -11,13 +12,15 @@ module.exports = {
     try {
       const currentUserId = req.auth.userId;
       const query = req.query.query;
+      const includeSelf = req.query.includeSelf === "true";
+
       let data;
-      if (query) {
+      if (query && !query.includeSelf) {
         data = await UserService.searchUsers(query, currentUserId);
       } else {
-        data = await UserService.getAllUsers(currentUserId); //service method to get all users accept itself
+        data = await UserService.getAllUsers(currentUserId, includeSelf);
       }
-      res.status(200).json(data);
+      res.status(200).json(ApiResponse("success", data));
     } catch (error) {
       console.log(error);
       next(error);
@@ -30,7 +33,7 @@ module.exports = {
       const userId = req.params.users_id;
       const data = await UserService.getUserByID(userId);
 
-      res.status(200).json(data);
+      res.status(200).json(ApiResponse("success", data));
     } catch (error) {
       console.log(error);
       next(error);

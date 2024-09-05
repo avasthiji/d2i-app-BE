@@ -12,7 +12,7 @@ module.exports.AttendanceService = {
       if (!attendance) {
         attendance = await insertRecord(TABLE_NAMES.ATTENDANCE, {
           attendanceDate: date,
-          employees:[]
+          employees: [],
         });
       }
 
@@ -25,15 +25,14 @@ module.exports.AttendanceService = {
           "Attendance record already exists for this user on this date."
         );
       }
-      
 
       const newEmployeeRecord = {
         user_id,
         punchInTime: new Date(),
-        punchOutTime:null,
-        workingDuration:0,
-        timesheet:null,
-        isOnLeave:false
+        punchOutTime: null,
+        workingDuration: 0,
+        timesheet: null,
+        isOnLeave: false,
       };
 
       // Add the user to the attendance record
@@ -41,10 +40,8 @@ module.exports.AttendanceService = {
       await attendance.save();
 
       return {
-        attendanceDate:attendance.attendanceDate,
-        employees:[
-          newEmployeeRecord
-        ]
+        attendanceDate: attendance.attendanceDate,
+        employees: [newEmployeeRecord],
       };
     } catch (error) {
       throw new NotFoundError(error.message);
@@ -57,9 +54,7 @@ module.exports.AttendanceService = {
         attendanceDate: date,
       });
       if (!attendance) {
-        throw new Error(
-          "Attendance record not found for the given date."
-        );
+        throw new Error("Attendance record not found for the given date.");
       }
 
       const employeeRecord = attendance.employees.find((employee) => {
@@ -81,8 +76,8 @@ module.exports.AttendanceService = {
       await attendance.save();
 
       return {
-        attendanceDate:attendance.attendanceDate,
-        employees:[employeeRecord],
+        attendanceDate: attendance.attendanceDate,
+        employees: [employeeRecord],
       };
     } catch (error) {
       throw new NotFoundError(error.message);
@@ -91,13 +86,41 @@ module.exports.AttendanceService = {
 
   getAllRecords: async (date) => {
     try {
-      let attendance = await getRecordByKey(TABLE_NAMES.ATTENDANCE, {
-        attendanceDate: date,
-      });
-      if (!attendance) {
-        return null;
-      }
-      return attendance;
+      const attendanceRecords = await Attendance.aggregate([
+        {
+          $match: { attendanceDate: new Date(date) },
+        },
+        {
+          $unwind: "$employees",
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "employees.user_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $unwind: "$userDetails",
+        },
+        {
+          $addFields: {
+            "employees.userName": {
+              $concat: ["$userDetails.firstName", " ", "$userDetails.lastName"],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            attendanceDate: { $first: "$attendanceDate" },
+            employees: { $push: "$employees" },
+            isHoliday: { $first: "$isHoliday" },
+          },
+        },
+      ]);
+      return attendanceRecords.length > 0 ? attendanceRecords[0] : null;
     } catch (error) {
       throw new NotFoundError(error.message);
     }

@@ -59,17 +59,23 @@ module.exports = {
             ApiResponse("error", "You are not authorized to access this data.")
           );
       }
-      
-      let {attendanceDate: date} = req.query;
-      if(date){
-        date = new Date(Date.UTC(new Date(date).getFullYear(), new Date(date).getMonth(), new Date(date).getDate()));
-      }else{
+
+      let { attendanceDate: date } = req.query;
+      if (date) {
         date = new Date(
-         Date.UTC(
-           new Date().getFullYear(),
-           new Date().getMonth(),
-           new Date().getDate()
-         )
+          Date.UTC(
+            new Date(date).getFullYear(),
+            new Date(date).getMonth(),
+            new Date(date).getDate()
+          )
+        );
+      } else {
+        date = new Date(
+          Date.UTC(
+            new Date().getFullYear(),
+            new Date().getMonth(),
+            new Date().getDate()
+          )
         );
       }
 
@@ -78,8 +84,7 @@ module.exports = {
         loggedInuserId
       );
 
-        res.json(ApiResponse("success", attendanceDetails || null));
-      
+      res.json(ApiResponse("success", attendanceDetails || null));
     } catch (error) {
       next(error);
     }
@@ -89,9 +94,8 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
       if (is_admin) {
-        
-        const {attendanceDate:date}  = req.query;
-        
+        const { attendanceDate: date } = req.query;
+
         const attendanceRecord = await AttendanceService.getAllRecords(date);
         res.json(ApiResponse("success", attendanceRecord || null));
       } else {
