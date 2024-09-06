@@ -1,3 +1,4 @@
+const { json } = require("express");
 const { NotFoundError } = require("../exceptions");
 const Attendance = require("../models/Attendance");
 const { TABLE_NAMES } = require("../utils/db");
@@ -48,13 +49,16 @@ module.exports.AttendanceService = {
     }
   },
 
-  punchOut: async (date, user_id) => {
+  punchOut: async (date, user_id, timesheet) => {
     try {
       const attendance = await getRecordByKey(TABLE_NAMES.ATTENDANCE, {
         attendanceDate: date,
       });
       if (!attendance) {
-        throw new Error("Attendance record not found for the given date.");
+         return {
+          attendanceDate: date,
+          employees: null,
+        };
       }
 
       const employeeRecord = attendance.employees.find((employee) => {
@@ -72,6 +76,9 @@ module.exports.AttendanceService = {
         (employeeRecord.punchOutTime - employeeRecord.punchInTime) / (1000 * 60)
       );
       employeeRecord.workingDuration = workingDuration;
+      if(timesheet){
+        employeeRecord.timesheet=timesheet;
+      }
 
       await attendance.save();
 

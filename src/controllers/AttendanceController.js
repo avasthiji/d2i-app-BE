@@ -5,7 +5,7 @@ module.exports = {
   //punchIn and punchout
   create: async (req, res, next) => {
     try {
-      let { attendanceDate, action } = req.body;
+      let { attendanceDate, action, timesheet } = req.body;
       if (!action) {
         return res
           .status(400)
@@ -36,7 +36,7 @@ module.exports = {
       if (action === "punchIn") {
         attendance = await AttendanceService.punchIn(date, user_id);
       } else if (action === "punchOut") {
-        attendance = await AttendanceService.punchOut(date, user_id);
+        attendance = await AttendanceService.punchOut(date, user_id, timesheet);
       } else {
         return res.status(400).json({ message: "Invalid Action specified." });
       }
