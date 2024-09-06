@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   birthday: { type: Date, required: true },
   password: { type: String, required: true },
   isActive: { type: Boolean, default: true },
-  userProfile: {type: String, default:null},
+  userProfile: { type: String, default: null },
   parent_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     enum: ["USER", "ADMIN"],
     default: "USER",
   },
+  passwordNeedsReset: { type: Boolean, default: true },
 });
 
 // Pre-save hook to hash the password
@@ -42,6 +43,7 @@ userSchema.pre("findOneAndUpdate", async function (next) {
     try {
       const salt = await bcrypt.genSalt(10);
       update.password = await bcrypt.hash(update.password, salt);
+      update.passwordNeedsReset = false;
     } catch (error) {
       return next(error);
     }
