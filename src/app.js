@@ -9,6 +9,7 @@ const {
   AccessDeniedError,
   NotFoundError,
   DuplicateEntry,
+  BadRequestError,
 } = require("./exceptions");
 const { router } = require("./routes");
 
@@ -58,6 +59,11 @@ app.use(function (err, req, res, next) {
       .json({ message: err?.message || "Not found message", code: err?.code });
   } else if (err instanceof DuplicateEntry) {
     return res.status(429).json(err);
+  } else if (err instanceof BadRequestError) {
+    return res.status(400).json({
+      message: err?.message || "Bad Request",
+      code: err?.code,
+    });
   }
 
   if (err instanceof Error) {

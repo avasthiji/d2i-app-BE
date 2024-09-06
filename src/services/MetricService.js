@@ -105,21 +105,21 @@ module.exports.MetricService = {
       });
 
       if (!parentMetric) {
-        throw new Error("metric not found");
+        return null;
       }
       const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
         parent_id: metricId,
       });
 
       if (!childMetrics) {
-        throw new Error("metric not found");
+        return null;
       }
       const result = {
         ...parentMetric._doc,
         sub_metrics: childMetrics,
       };
 
-      return ApiResponse("success", result);
+      return result;
     } catch (error) {
       throw new NotFoundError(error.message);
     }

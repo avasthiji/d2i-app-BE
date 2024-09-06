@@ -1,4 +1,5 @@
 const { MetricService } = require("../services/MetricService");
+const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
   index: async (req, res, next) => {
@@ -17,11 +18,10 @@ module.exports = {
       const data = await MetricService.getChildMetricsByParentId(parentId);
 
       if (!data) {
-        return res
-          .status(404)
-          .json({ message: "No child metrics found for this parent" });
+        res.status(200).json(ApiResponse("success", data));
+      } else {
+        res.status(200).json(ApiResponse("success", data));
       }
-      res.status(200).json(data);
     } catch (error) {
       console.log(error);
       next(error);
@@ -31,7 +31,7 @@ module.exports = {
   //create
   create: async (req, res, next) => {
     try {
-      const metricData = req.body;      
+      const metricData = req.body;
       const { is_admin } = req.auth;
       if (is_admin) {
         const newMetric = await MetricService.createMetric(metricData);
@@ -55,9 +55,9 @@ module.exports = {
       );
 
       if (!updatedMetric) {
-        return res.status(404).json({ message: "Metric not found" });
+        return res.status(400).json({ message: "Metric not found" });
       }
-      res.status(200).json(updatedMetric);
+      res.status(200).json(ApiResponse("success", updatedMetric));
     } catch (error) {
       console.log(error);
       next(error);

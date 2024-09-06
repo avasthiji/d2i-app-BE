@@ -1,5 +1,5 @@
 const { json } = require("express");
-const { NotFoundError } = require("../exceptions");
+const { NotFoundError, BadRequestError } = require("../exceptions");
 const Attendance = require("../models/Attendance");
 const { TABLE_NAMES } = require("../utils/db");
 const { getRecordByKey, insertRecord } = require("../utils/QueryBuilder");
@@ -45,7 +45,7 @@ module.exports.AttendanceService = {
         employees: [newEmployeeRecord],
       };
     } catch (error) {
-      throw new NotFoundError(error.message);
+      throw new BadRequestError(error.message);
     }
   },
 
@@ -55,7 +55,7 @@ module.exports.AttendanceService = {
         attendanceDate: date,
       });
       if (!attendance) {
-         return {
+        return {
           attendanceDate: date,
           employees: null,
         };
@@ -76,8 +76,8 @@ module.exports.AttendanceService = {
         (employeeRecord.punchOutTime - employeeRecord.punchInTime) / (1000 * 60)
       );
       employeeRecord.workingDuration = workingDuration;
-      if(timesheet){
-        employeeRecord.timesheet=timesheet;
+      if (timesheet) {
+        employeeRecord.timesheet = timesheet;
       }
 
       await attendance.save();
@@ -87,7 +87,7 @@ module.exports.AttendanceService = {
         employees: [employeeRecord],
       };
     } catch (error) {
-      throw new NotFoundError(error.message);
+      throw new BadRequestError(error.message);
     }
   },
 
@@ -129,7 +129,7 @@ module.exports.AttendanceService = {
       ]);
       return attendanceRecords.length > 0 ? attendanceRecords[0] : null;
     } catch (error) {
-      throw new NotFoundError(error.message);
+      throw new BadRequestError(error.message);
     }
   },
 

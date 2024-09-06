@@ -26,6 +26,11 @@ module.exports.DuplicateEntry = function (errors = {}) {
   this.errors = errors;
 };
 
+module.exports.BadRequestError = function (message = "Bad Request") {
+  this.message = message;
+  this.code = 400;
+};
+
 module.exports.Exceptions = {
   throwGlobalValidationException: (message) => {
     throw new this.ValidationError({
