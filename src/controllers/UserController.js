@@ -5,6 +5,7 @@ const { UserService } = require("../services/UserService");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
 const { ApiResponse } = require("../utils/ApiHelper");
+const { createUserSchema } = require("../validations/UserValidations");
 
 module.exports = {
   //index
@@ -47,23 +48,28 @@ module.exports = {
       const { is_admin } = req.auth;
 
       if (is_admin) {
-        const newUser = await UserService.createUser(userData);
+        const { error } = createUserSchema.validate(userData);
+        if (error) {
+          res.status(400).json({ message: error.details[0].message });
+        } else {
+          const newUser = await UserService.createUser(userData);
 
-        const inviteLink = `${CONSTANTS.INVITE_URL}${newUser.inviteCode}`;
+          const inviteLink = `${CONSTANTS.INVITE_URL}${newUser.inviteCode}`;
 
-        const mailOptions = {
-          from: process.env.EMAIL_FROM,
-          to: newUser.officialEmail,
-          subject: "Your Account Has Been Created",
-          html: `<p>Hello ${newUser.firstName},</p>
-                 <p>Your account has been created by the admin. You can set your password using the following link:</p>
-                 <p><strong>Email:</strong> ${newUser.officialEmail}</p>
-                 <p>Please click the link below to set your password and activate your account:</p>
-                 <a href="${inviteLink}">Set Password</a>`,
-        };
-        await transporter.sendMail(mailOptions);
+          const mailOptions = {
+            from: process.env.EMAIL_FROM,
+            to: newUser.officialEmail,
+            subject: "Your Account Has Been Created",
+            html: `<p>Hello ${newUser.firstName},</p>
+            <p>Your account has been created by the admin. You can set your password using the following link:</p>
+            <p><strong>Email:</strong> ${newUser.officialEmail}</p>
+            <p>Please click the link below to set your password and activate your account:</p>
+            <a href="${inviteLink}">Set Password</a>`,
+          };
+          await transporter.sendMail(mailOptions);
 
-        res.status(201).json(newUser);
+          res.status(201).json(newUser);
+        }
       } else {
         res.status(403).json({ message: "Access denied" });
       }

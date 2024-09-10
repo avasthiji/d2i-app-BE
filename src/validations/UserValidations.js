@@ -1,4 +1,10 @@
-const Joi = require('joi');
+const Joi = require("joi");
+
+const createUserSchema = Joi.object({
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+  officialEmail: Joi.string().email().required(),
+});
 
 const updateUserSchema = Joi.object({
   firsName: Joi.string().optional(),
@@ -14,6 +20,7 @@ const updateUserSchema = Joi.object({
     .pattern(/^[0-9]{10}$/)
     .optional(),
   birthday: Joi.date().iso().optional(),
+  password: Joi.string().min(6).optional(),
 });
 
-module.exports = {updateUserSchema};
+module.exports = { createUserSchema, updateUserSchema };
