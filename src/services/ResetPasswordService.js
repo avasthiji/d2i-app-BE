@@ -10,7 +10,7 @@ const {
 
 const AuthService = require("./AuthService");
 
-module.exports.SignupService = {
+module.exports.ResetPasswordService = {
   registerUser: async ({ inviteCode, password }) => {
     try {
       // Find the user by inviteCode and ensure they are still in the 'invited' state

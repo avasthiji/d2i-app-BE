@@ -1,14 +1,17 @@
-const { SignupService } = require("../services/SignupService");
+const { ResetPasswordService } = require("../services/ResetPasswordService");
+
 
 module.exports = {
   create: async (req, res, next) => {
     try {
+      console.log('inside reset password');
+      
       const inviteCode = req.query.inviteCode;
       const { password } = req.body;
       if (!inviteCode) {
         return res.status(400).json({ message: "Invite code is required" });
       }
-      const data = await SignupService.registerUser({ inviteCode, password });
+      const data = await ResetPasswordService.registerUser({ inviteCode, password });
       return res.status(200).json(data);
     } catch (error) {
       console.error(error);

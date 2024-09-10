@@ -4,7 +4,6 @@ const { RouteHelper } = require("../utils/RouteHelper");
 
 //controllers
 const UserController = require("../controllers/UserController");
-const SignupController = require("../controllers/SignupController");
 const LoginController = require("../controllers/LoginController");
 const MetricController = require("../controllers/MetricController");
 const { HealthController } = require("../controllers/HealthController");
@@ -14,11 +13,12 @@ const RewardController = require("../controllers/RewardController");
 const AuthMiddleware = require("../middlewares/AuthMiddlewares");
 
 const validate = require("../middlewares/ValidateMiddleware");
-const { signupSchema } = require("../validations/signupValidation");
+const { resetPasswordSchema } = require("../validations/resetPasswordValidation");
 const { loginSchema } = require("../validations/loginValidation");
 const MeController = require("../controllers/MeController");
 const AttendanceController = require("../controllers/AttendanceController");
 const upload = require("../middlewares/MulterMiddleware");
+const ResetPasswordController = require("../controllers/ResetPasswordController");
 
 //authMiddleware
 
@@ -27,9 +27,9 @@ RouteHelper.resource(router, "health", HealthController);
 RouteHelper.resource(router, "lookups", LookupController);
 RouteHelper.resource(
   router,
-  "signup",
-  SignupController,
-  validate(signupSchema)
+  "resetpassword",
+  ResetPasswordController,
+  validate(resetPasswordSchema)
 );
 RouteHelper.resource(router, "login", LoginController, validate(loginSchema));
 RouteHelper.resource(
