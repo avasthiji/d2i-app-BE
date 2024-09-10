@@ -11,7 +11,6 @@ module.exports.LoginService = {
     try {
       // Check if user exists
       const user = await getRecordByKey(TABLE_NAMES.USERS, { officialEmail });
-
       if (!user) throw new Error("User not found");
       //check if passowrd matches
       const isMatch = await bcrypt.compare(password, user.password);
@@ -26,11 +25,11 @@ module.exports.LoginService = {
         firstName: user.firstName,
         lastName: user.lastName,
         officialEmail: user.officialEmail,
-        alternateEmail: user.alternateEmail,
-        contactNumber: user.contactNumber,
-        alternateContactNumber: user.alternateContactNumber,
-        birthday: user.birthday,
-        bloodGroup: user.bloodGroup,
+        // alternateEmail: user.alternateEmail,
+        // contactNumber: user.contactNumber,
+        // alternateContactNumber: user.alternateContactNumber,
+        // birthday: user.birthday,
+        // bloodGroup: user.bloodGroup,
         role: user.role,
       });
     } catch (error) {

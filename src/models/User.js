@@ -4,13 +4,14 @@ const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  bloodGroup: { type: String, required: true },
+  employeeId: { type: Number, unique: true, required: true },
   officialEmail: { type: String, required: true, unique: true },
+  bloodGroup: { type: String, default: null },
   alternateEmail: { type: String, default: null },
-  contactNumber: { type: String, required: true },
+  contactNumber: { type: String, default: null },
   alternateContactNumber: { type: String, default: null },
-  birthday: { type: Date, required: true },
-  password: { type: String, required: true },
+  birthday: { type: Date, default: null },
+  password: { type: String, default: null },
   isActive: { type: Boolean, default: true },
   userProfile: { type: String, default: null },
   parent_id: {
@@ -25,14 +26,24 @@ const userSchema = new mongoose.Schema({
     default: "USER",
   },
   passwordNeedsReset: { type: Boolean, default: true },
+  userState: { type: String, enum: ["invited", "active"], default: "invited" },
+  inviteCode: { type: String, sparse:true },
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Pre-save hook to hash the password
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  if (!this.password) {
+    return next();
+  }
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    return next(err);
+  }
 });
 
 // Pre-update hook to hash the password

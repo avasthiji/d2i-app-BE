@@ -1,6 +1,6 @@
 module.exports.ValidationError = function (errors = {}) {
   // errors ex. {"email": "email is not unique"}
-  this.message = `${errors || "validation errors occurred."}`;
+  this.message = `${errors.message || "validation errors occurred."}`;
   this.code = 422;
   // this.errors = errors;
 };

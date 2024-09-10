@@ -1,4 +1,5 @@
 const { NotFoundError } = require("../exceptions");
+const crypto = require("crypto");
 const User = require("../models/User");
 const { TABLE_NAMES } = require("../utils/db");
 const {
@@ -7,6 +8,7 @@ const {
   insertRecord,
   updateRecordsByKey,
   deleteRecordsById,
+  getLatestRecordByKey,
 } = require("../utils/QueryBuilder");
 
 module.exports.UserService = {
@@ -42,8 +44,30 @@ module.exports.UserService = {
   },
   createUser: async (userData) => {
     try {
-      const response = await insertRecord(User, userData);
-      return response;
+      const latestUser = await getLatestRecordByKey(
+        TABLE_NAMES.USERS,
+        {},
+        "createdAt",
+        "desc"
+      );
+
+      let newEmployeeId = 1;
+      if (latestUser) {
+        newEmployeeId = latestUser.employeeId + 1;
+      }
+
+      //generate inviteCode
+      const inviteCode = crypto.randomBytes(16).toString("hex");
+
+      const newUser = await insertRecord(TABLE_NAMES.USERS, {
+        ...userData,
+        employeeId: newEmployeeId,
+        password: null,
+        userState: "invited",
+        inviteCode: inviteCode,
+      });
+
+      return newUser;
     } catch (error) {
       throw error;
     }

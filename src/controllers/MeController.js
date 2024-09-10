@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { UserService } = require("../services/UserService");
 const { ApiResponse } = require("../utils/ApiHelper");
+const { updateUserSchema } = require("../validations/UserValidations");
 
 module.exports = {
   index: async (req, res, next) => {
@@ -20,27 +21,37 @@ module.exports = {
       const userId = req.params.me_id;
       const updatedData = req.body;
 
-      const existingUser = await UserService.getUserByID(userId);
-      if (!existingUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      //if file was uploaded, add it to file path of updated data
-      if (file) {
-        //file path for old image
-        const oldImagePath = existingUser.userProfile;
-
-        //check if an old image exists and delete it
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+      //validate the updateData
+      const { error } = updateUserSchema.validate(updatedData);
+      if (error) {
+        res.status(400).json({ message: error.details[0].message });
+      } else {
+        const existingUser = await UserService.getUserByID(userId);
+        if (!existingUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        //if file was uploaded, add it to file path of updated data
+        if (file) {
+          //file path for old image
+          const oldImagePath = existingUser.userProfile;
+          //check if an old image exists and delete it
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+          //saving new file path
+          updatedData.userProfile = req.file.filename;
         }
 
-        //saving new file path
-        updatedData.userProfile = req.file.filename;
-      }
-
-      if (updatedData.role) {
-        res.status(403).json({ message: "Access denied can't modify ROLE" });
-      } else {
+        if (
+          updatedData.role ||
+          updatedData.employeeId ||
+          updatedData.officialEmail
+        ) {
+          res.status(403).json({
+            message:
+              "Access denied can't modify ROLE or EmployeeId or OfficialEmail",
+          });
+        }
         if (userId === req.auth.userId) {
           const updatedUser = await UserService.updateUser(userId, updatedData);
           if (!updatedUser) {

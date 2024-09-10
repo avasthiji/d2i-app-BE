@@ -1,7 +1,9 @@
-const users = require('../models/User');
+const users = require("../models/User");
 const updateRecordsByKey = async function (TABLENAME, filter, update) {
   try {
-    const updatedData = await TABLENAME.findOneAndUpdate(filter, update, {new: true});
+    const updatedData = await TABLENAME.findOneAndUpdate(filter, update, {
+      new: true,
+    });
     return updatedData;
   } catch (error) {
     return error.message;
@@ -18,7 +20,7 @@ const deleteRecordsById = async function (TABLENAME, id) {
 };
 const getRecordByKey = async function (TABLENAME, filter) {
   try {
-    const record= await TABLENAME.findOne(filter);
+    const record = await TABLENAME.findOne(filter);
     return record;
   } catch (error) {
     return error.message;
@@ -26,7 +28,7 @@ const getRecordByKey = async function (TABLENAME, filter) {
 };
 const getRecordsByKey = async function (TABLENAME, filter) {
   try {
-    const records= await TABLENAME.find(filter);
+    const records = await TABLENAME.find(filter);
     return records;
   } catch (error) {
     return error.message;
@@ -41,10 +43,27 @@ const insertRecord = async function (TABLENAME, insertObj) {
   }
 };
 
+const getLatestRecordByKey = async function (
+  TABLENAME,
+  filter,
+  sortField,
+  sortOrder = "desc"
+) {
+  try {
+    const record = await TABLENAME.findOne(filter).sort({
+      [sortField]: sortOrder === "desc" ? -1 : 1,
+    });
+    return record;
+  } catch (error) {
+    return error.message;
+  }
+};
+
 module.exports = {
   updateRecordsByKey,
   getRecordsByKey,
   getRecordByKey,
   deleteRecordsById,
   insertRecord,
+  getLatestRecordByKey,
 };

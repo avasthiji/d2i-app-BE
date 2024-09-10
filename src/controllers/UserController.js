@@ -49,18 +49,17 @@ module.exports = {
       if (is_admin) {
         const newUser = await UserService.createUser(userData);
 
-        const loginLink = CONSTANTS.LOGIN_URL;
+        const inviteLink = `${CONSTANTS.INVITE_URL}${newUser.inviteCode}`;
 
         const mailOptions = {
           from: process.env.EMAIL_FROM,
           to: newUser.officialEmail,
           subject: "Your Account Has Been Created",
           html: `<p>Hello ${newUser.firstName},</p>
-                 <p>Your account has been created by the admin. You can log in with the following credentials:</p>
+                 <p>Your account has been created by the admin. You can set your password using the following link:</p>
                  <p><strong>Email:</strong> ${newUser.officialEmail}</p>
-                 <p><strong>Password:</strong> ${userData.password}</p>
-                 <p>Please click the link below to log in and update your information:</p>
-                 <a href="${loginLink}">Login</a>`,
+                 <p>Please click the link below to set your password and activate your account:</p>
+                 <a href="${inviteLink}">Set Password</a>`,
         };
         await transporter.sendMail(mailOptions);
 

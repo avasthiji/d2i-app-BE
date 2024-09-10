@@ -39,7 +39,12 @@ RouteHelper.resource(
   AuthMiddleware.verify(["ADMIN", "USER"]),
   upload
 );
-RouteHelper.resource(router, "subordinates", SubordinateControllers,AuthMiddleware.verify());
+RouteHelper.resource(
+  router,
+  "subordinates",
+  SubordinateControllers,
+  AuthMiddleware.verify()
+);
 RouteHelper.resource(
   router,
   "metrics",
@@ -54,8 +59,19 @@ RouteHelper.resource(
   AuthMiddleware.verify(["ADMIN", "USER"])
 );
 
-RouteHelper.resource(router, "me", MeController, AuthMiddleware.verify(),upload);
+RouteHelper.resource(
+  router,
+  "me",
+  MeController,
+  AuthMiddleware.verify(),
+  upload
+);
 
-RouteHelper.resource(router,"attendance", AttendanceController,AuthMiddleware.verify());
+RouteHelper.resource(
+  router,
+  "attendance",
+  AttendanceController,
+  AuthMiddleware.verify()
+);
 
 module.exports.router = router;
