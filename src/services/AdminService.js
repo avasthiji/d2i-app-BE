@@ -1,7 +1,5 @@
 const { TABLE_NAMES } = require("../utils/db");
-const crypto = require("crypto");
 const { getLatestRecordByKey, insertRecord } = require("../utils/QueryBuilder");
-const { Password } = require("@mui/icons-material");
 
 module.exports.AdminService = {
   createAdmin: async (userData) => {
@@ -17,12 +15,13 @@ module.exports.AdminService = {
       if (latestUser) {
         newEmployeeId = latestUser.employeeId + 1;
       }
-      const inviteCode = crypto.randomBytes(16).toString("hex");
+
       const newAdmin = await insertRecord(TABLE_NAMES.USERS, {
         ...userData,
         employeeId: newEmployeeId,
         userState: "active",
         role: "ADMIN",
+        joiningDate: Date.now(),
       });
       return newAdmin;
     } catch (error) {

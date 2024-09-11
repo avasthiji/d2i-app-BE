@@ -64,6 +64,7 @@ module.exports.UserService = {
         employeeId: newEmployeeId,
         password: null,
         userState: "invited",
+        joiningDate: userData.joiningDate || Date.now(),
         inviteCode: inviteCode,
       });
 

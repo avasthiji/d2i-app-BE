@@ -5,6 +5,7 @@ const createUserSchema = Joi.object({
   lastName: Joi.string().required(),
   officialEmail: Joi.string().email().required(),
   parent_id: Joi.string().required(),
+  joiningDate: Joi.date().optional(),
 });
 
 const createAdminSchema = Joi.object({
@@ -16,7 +17,7 @@ const createAdminSchema = Joi.object({
 });
 
 const updateUserSchema = Joi.object({
-  firsName: Joi.string().optional(),
+  firstName: Joi.string().optional(),
   lastName: Joi.string().optional(),
   bloodGroup: Joi.string()
     .valid("A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-")
@@ -30,6 +31,7 @@ const updateUserSchema = Joi.object({
     .optional(),
   birthday: Joi.date().iso().optional(),
   password: Joi.string().min(6).optional(),
+  anniversaryDate: Joi.date().optional(),
 });
 
 module.exports = { createUserSchema, createAdminSchema, updateUserSchema };

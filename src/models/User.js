@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
   alternateContactNumber: { type: String, default: null },
   birthday: { type: Date, default: null },
   password: { type: String, default: null },
+  anniversaryDate: { type: Date, default: null },
+  joiningDate: { type: Date, default: null },
   isActive: { type: Boolean, default: true },
   userProfile: { type: String, default: null },
   parent_id: {
@@ -27,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   passwordNeedsReset: { type: Boolean, default: true },
   userState: { type: String, enum: ["invited", "active"], default: "invited" },
-  inviteCode: { type: String, sparse:true },
+  inviteCode: { type: String, sparse: true },
   createdAt: { type: Date, default: Date.now },
 });
 
