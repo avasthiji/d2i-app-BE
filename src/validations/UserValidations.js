@@ -4,6 +4,7 @@ const createUserSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
   officialEmail: Joi.string().email().required(),
+  parent_id:Joi.string().required(),
 });
 
 const updateUserSchema = Joi.object({
