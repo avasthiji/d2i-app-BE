@@ -73,6 +73,45 @@ module.exports.RewardService = {
           },
         },
         {
+          $lookup: {
+            from: "metrics",
+            localField: "metric_id",
+            foreignField: "_id",
+            as: "metricInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$metricInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            metricName: "$metricInfo.label",
+            metricParentId: "$metricInfo.parent_id",
+          },
+        },
+        {
+          $lookup: {
+            from: "metrics",
+            localField: "metricParentId",
+            foreignField: "_id",
+            as: "parentMetricInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$parentMetricInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            metricParentName: "$parentMetricInfo.label",
+          },
+        },
+        {
           $project: {
             _id: 1,
             metric_id: 1,
@@ -82,6 +121,8 @@ module.exports.RewardService = {
             submitted_by: 1,
             created_at: 1,
             submittedByName: 1,
+            metricName: 1,
+            metricParentName: { $ifNull: ["$metricParentName", null] },
           },
         },
       ]);
