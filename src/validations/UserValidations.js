@@ -4,7 +4,15 @@ const createUserSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
   officialEmail: Joi.string().email().required(),
-  parent_id:Joi.string().required(),
+  parent_id: Joi.string().required(),
+});
+
+const createAdminSchema = Joi.object({
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+  officialEmail: Joi.string().email().required(),
+  adminSignupKey: Joi.string().required(),
+  password: Joi.string().min(6).required(),
 });
 
 const updateUserSchema = Joi.object({
@@ -24,4 +32,4 @@ const updateUserSchema = Joi.object({
   password: Joi.string().min(6).optional(),
 });
 
-module.exports = { createUserSchema, updateUserSchema };
+module.exports = { createUserSchema, createAdminSchema, updateUserSchema };

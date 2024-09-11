@@ -52,7 +52,7 @@ module.exports.UserService = {
       );
 
       let newEmployeeId = 1;
-      if (latestUser) {
+      if (latestUser && latestUser?.employeeId) {
         newEmployeeId = latestUser.employeeId + 1;
       }
 

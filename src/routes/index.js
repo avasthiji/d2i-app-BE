@@ -13,12 +13,15 @@ const RewardController = require("../controllers/RewardController");
 const AuthMiddleware = require("../middlewares/AuthMiddlewares");
 
 const validate = require("../middlewares/ValidateMiddleware");
-const { resetPasswordSchema } = require("../validations/resetPasswordValidation");
+const {
+  resetPasswordSchema,
+} = require("../validations/resetPasswordValidation");
 const { loginSchema } = require("../validations/loginValidation");
 const MeController = require("../controllers/MeController");
 const AttendanceController = require("../controllers/AttendanceController");
 const upload = require("../middlewares/MulterMiddleware");
 const ResetPasswordController = require("../controllers/ResetPasswordController");
+const AdminController = require("../controllers/AdminController");
 
 //authMiddleware
 
@@ -31,6 +34,7 @@ RouteHelper.resource(
   ResetPasswordController,
   validate(resetPasswordSchema)
 );
+RouteHelper.resource(router, "admin", AdminController, AuthMiddleware.verify());
 RouteHelper.resource(router, "login", LoginController, validate(loginSchema));
 RouteHelper.resource(
   router,
