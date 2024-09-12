@@ -29,8 +29,8 @@ const updateUserSchema = Joi.object({
   alternateContactNumber: Joi.string()
     .pattern(/^[0-9]{10}$/)
     .optional(),
-  birthday: Joi.date().iso().optional(),
-  password: Joi.string().min(6).optional(),
+  birthday: Joi.date().optional(),
+  password: Joi.string().min(8).optional(),
   anniversaryDate: Joi.date().optional(),
 });
 

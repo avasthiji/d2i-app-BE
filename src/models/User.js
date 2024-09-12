@@ -10,10 +10,10 @@ const userSchema = new mongoose.Schema({
   alternateEmail: { type: String, default: null },
   contactNumber: { type: String, default: null },
   alternateContactNumber: { type: String, default: null },
-  birthday: { type: Date, default: null },
+  birthday: { type: String, default: null },
   password: { type: String, default: null },
-  anniversaryDate: { type: Date, default: null },
-  joiningDate: { type: Date, default: null },
+  anniversaryDate: { type: String, default: null },
+  joiningDate: { type: String, default: null },
   isActive: { type: Boolean, default: true },
   userProfile: { type: String, default: null },
   parent_id: {
