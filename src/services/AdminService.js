@@ -1,3 +1,4 @@
+const moment = require("moment");
 const { TABLE_NAMES } = require("../utils/db");
 const { getLatestRecordByKey, insertRecord } = require("../utils/QueryBuilder");
 
@@ -21,7 +22,7 @@ module.exports.AdminService = {
         employeeId: newEmployeeId,
         userState: "active",
         role: "ADMIN",
-        joiningDate: Date.now(),
+        joiningDate: moment(new Date()).format("yyyy-mm-DD"),
       });
       return newAdmin;
     } catch (error) {

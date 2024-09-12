@@ -13,7 +13,7 @@ const createAdminSchema = Joi.object({
   lastName: Joi.string().required(),
   officialEmail: Joi.string().email().required(),
   adminSignupKey: Joi.string().required(),
-  password: Joi.string().min(6).required(),
+  password: Joi.string().min(8).required(),
 });
 
 const updateUserSchema = Joi.object({

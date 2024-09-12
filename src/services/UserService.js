@@ -1,4 +1,5 @@
 const { NotFoundError } = require("../exceptions");
+const moment = require("moment");
 const crypto = require("crypto");
 const User = require("../models/User");
 const { TABLE_NAMES } = require("../utils/db");
@@ -64,7 +65,8 @@ module.exports.UserService = {
         employeeId: newEmployeeId,
         password: null,
         userState: "invited",
-        joiningDate: userData.joiningDate || Date.now(),
+        joiningDate:
+          userData.joiningDate || moment(new Date()).format("yyyy-mm-DD"),
         inviteCode: inviteCode,
       });
 
