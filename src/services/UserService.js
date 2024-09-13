@@ -16,7 +16,7 @@ module.exports.UserService = {
   getAllUsers: async (currentUserId, includeSelf) => {
     try {
       const users = await getRecordsByKey(TABLE_NAMES.USERS, {
-        isActive: true,
+        userState: "active",
       });
       if (!includeSelf) {
         const filteredUsers = users.filter(
@@ -66,7 +66,7 @@ module.exports.UserService = {
         password: null,
         userState: "invited",
         joiningDate:
-          userData.joiningDate || moment(new Date()).format("yyyy-mm-DD"),
+          userData.joiningDate || moment(new Date()).format("YYYY-MM-DD"),
         inviteCode: inviteCode,
       });
 
@@ -102,7 +102,7 @@ module.exports.UserService = {
       const response = await updateRecordsByKey(
         TABLE_NAMES.USERS,
         { _id: userId },
-        { isActive: false }
+        { userState: "deleted" }
       );
       return response;
     } catch (error) {
@@ -122,7 +122,7 @@ module.exports.UserService = {
             ],
           },
         ],
-        isActive: true, // for non-deleted user only
+        userState: "active", // for non-deleted user only
       };
 
       const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery);

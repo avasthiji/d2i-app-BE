@@ -22,7 +22,7 @@ module.exports.AdminService = {
         employeeId: newEmployeeId,
         userState: "active",
         role: "ADMIN",
-        joiningDate: moment(new Date()).format("yyyy-mm-DD"),
+        joiningDate: moment(new Date()).format("YYYY-MM-DD"),
       });
       return newAdmin;
     } catch (error) {
