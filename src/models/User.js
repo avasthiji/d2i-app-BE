@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema({
   password: { type: String, default: null },
   anniversaryDate: { type: String, default: null },
   joiningDate: { type: String, default: null },
-  isActive: { type: Boolean, default: true },
   userProfile: { type: String, default: null },
   parent_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +27,11 @@ const userSchema = new mongoose.Schema({
     default: "USER",
   },
   passwordNeedsReset: { type: Boolean, default: true },
-  userState: { type: String, enum: ["invited", "active"], default: "invited" },
+  userState: {
+    type: String,
+    enum: ["invited", "active", "deleted"],
+    default: "invited",
+  },
   inviteCode: { type: String, sparse: true },
   createdAt: { type: Date, default: Date.now },
 });
@@ -57,6 +60,7 @@ userSchema.pre("findOneAndUpdate", async function (next) {
       const salt = await bcrypt.genSalt(10);
       update.password = await bcrypt.hash(update.password, salt);
       update.passwordNeedsReset = false;
+      update.userState = "active";
     } catch (error) {
       return next(error);
     }
