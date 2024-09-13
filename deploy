@@ -1,0 +1,6 @@
+#!/bin/bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR;
+eval "$(ssh-agent -s)"
+ssh-add /home/ubuntu/.ssh/d2iapp
+git pull
