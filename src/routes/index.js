@@ -22,6 +22,7 @@ const AttendanceController = require("../controllers/AttendanceController");
 const upload = require("../middlewares/MulterMiddleware");
 const ResetPasswordController = require("../controllers/ResetPasswordController");
 const AdminController = require("../controllers/AdminController");
+const LeaveController = require("../controllers/LeaveController");
 
 //authMiddleware
 
@@ -77,5 +78,7 @@ RouteHelper.resource(
   AttendanceController,
   AuthMiddleware.verify()
 );
+
+RouteHelper.resource(router,"leave",LeaveController,AuthMiddleware.verify());
 
 module.exports.router = router;

@@ -5,8 +5,8 @@ module.exports.ValidationError = function (errors = {}) {
   // this.errors = errors;
 };
 
-module.exports.UnauthorizedError = function () {
-  this.message = "Unauthorized";
+module.exports.UnauthorizedError = function (errors = {}) {
+  this.message = `${errors.message || "Unauthorized"}`;
   this.code = 401;
 };
 
