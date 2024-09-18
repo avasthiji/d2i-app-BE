@@ -55,7 +55,7 @@ module.exports.LeaveService = {
             status: 1,
           },
         },
-      ]);
+      ]).sort({ leaveStart: -1 });
 
       return leaves;
     } catch (error) {
@@ -67,6 +67,20 @@ module.exports.LeaveService = {
     try {
       const { userId, leaveStart, leaveEnd, leaveType, dayType, reason } =
         leaveData;
+
+      const overlappingLeave = await Leave.findOne({
+        userId,
+        $or: [
+          { leaveStart: { $lte: leaveEnd }, leaveEnd: { $gte: leaveStart } },
+        ],
+        status: { $in: ["pending", "approved"] },
+      });
+
+      if (overlappingLeave) {
+        throw new ValidationError(
+          "You already have a leave request for these dates."
+        );
+      }
 
       const user = await User.findById(userId);
       if (!user) throw new Error("User not found");
@@ -111,6 +125,10 @@ module.exports.LeaveService = {
       const leave = await Leave.findOne({ _id: leaveId, managerId });
       if (!leave) throw new Error("Leave not found or unauthorized");
 
+      if (leave.status !== "pending") {
+        throw new Error("Leave has already been processed.");
+      }
+
       leave.status = "approved";
       await leave.save();
 
@@ -129,7 +147,7 @@ module.exports.LeaveService = {
 
       return leave;
     } catch (error) {
-      throw new UnauthorizedError(error);
+      throw new ValidationError(error.message);
     }
   },
 
@@ -137,6 +155,10 @@ module.exports.LeaveService = {
     try {
       const leave = await Leave.findOne({ _id: leaveId, managerId });
       if (!leave) throw new Error("Leave not found or unauthorized");
+
+      if (leave.status !== "pending") {
+        throw new Error("Leave has already been processed.");
+      }
 
       leave.status = "rejected";
       await leave.save();
@@ -157,7 +179,7 @@ module.exports.LeaveService = {
 
       return leave;
     } catch (error) {
-      throw new UnauthorizedError(error);
+      throw new ValidationError(error.message);
     }
   },
 };
