@@ -15,7 +15,47 @@ module.exports.LeaveService = {
     return await Leave.find({ userId }).sort({ leaveStart: -1 });
   },
 
-  // Get leaves by managerId (for 2nd level managers or admin)
+  //get all leaves
+  getAllLeaves: async () => {
+    return await Leave.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$userInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          userName: {
+            $concat: ["$userInfo.firstName", " ", "$userInfo.lastName"],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          userName: 1,
+          leaveStart: 1,
+          leaveEnd: 1,
+          leaveType: 1,
+          dayType: 1,
+          reason: 1,
+          status: 1,
+        },
+      },
+    ]).sort({ leaveStart: -1 });
+  },
+
+  // Get leaves by managerId (for 2nd level managers or admin) //now only for manager
   getLeavesByManagerId: async (managerId) => {
     try {
       const leaves = await Leave.aggregate([
@@ -67,6 +107,20 @@ module.exports.LeaveService = {
     try {
       const { userId, leaveStart, leaveEnd, leaveType, dayType, reason } =
         leaveData;
+
+      const startDate = new Date(leaveStart);
+      const endDate = new Date(leaveEnd);
+      const currentDate = new Date();
+
+      if (startDate < currentDate) {
+        throw new ValidationError("Leave start date cannot be in the past.");
+      }
+
+      if (endDate < startDate) {
+        throw new ValidationError(
+          "Leave end date cannot be before leave start date."
+        );
+      }
 
       const overlappingLeave = await Leave.findOne({
         userId,
@@ -120,10 +174,14 @@ module.exports.LeaveService = {
     }
   },
 
-  approveLeave: async (leaveId, managerId) => {
+  approveLeave: async (leaveId, managerId, is_admin) => {
     try {
-      const leave = await Leave.findOne({ _id: leaveId, managerId });
-      if (!leave) throw new Error("Leave not found or unauthorized");
+      const leave = await Leave.findById(leaveId);
+      if (!leave) throw new Error("Leave not found");
+
+      if(!is_admin && leave.managerId.toString() !== managerId){
+         throw new Error("You are not authorized to approve this leave.");
+      }
 
       if (leave.status !== "pending") {
         throw new Error("Leave has already been processed.");
@@ -153,8 +211,12 @@ module.exports.LeaveService = {
 
   rejectLeave: async (leaveId, managerId) => {
     try {
-      const leave = await Leave.findOne({ _id: leaveId, managerId });
-      if (!leave) throw new Error("Leave not found or unauthorized");
+       const leave = await Leave.findById(leaveId);
+       if (!leave) throw new Error("Leave not found");
+
+       if (!is_admin && leave.managerId.toString() !== managerId) {
+         throw new Error("You are not authorized to reject this leave.");
+       }
 
       if (leave.status !== "pending") {
         throw new Error("Leave has already been processed.");
