@@ -12,7 +12,7 @@ const CONSTANTS = require("../constants");
 module.exports.LeaveService = {
   // Get leaves by userId (for regular users)
   getLeavesByUserId: async (userId) => {
-    return await Leave.find({ userId }).sort({ leaveDate: -1 });
+    return await Leave.find({ userId }).sort({ leaveStart: -1 });
   },
 
   // Get leaves by managerId (for 2nd level managers or admin)
@@ -61,15 +61,6 @@ module.exports.LeaveService = {
     } catch (error) {
       throw new NotFoundError(error.message);
     }
-  },
-
-  getAllLeavesForAdmin: async () => {
-    return await Leave.find().sort({ leaveDate: -1 });
-  },
-
-  // Get leave by leaveId
-  getLeaveById: async (leaveId) => {
-    return Leave.findById(leaveId);
   },
 
   createLeave: async (leaveData) => {

@@ -6,14 +6,9 @@ module.exports = {
   index: async (req, res, next) => {
     try {
       const currentUserId = req.auth.userId;
-      const { is_admin } = req.auth;
       let data;
 
-      if (is_admin) {
-        data = await LeaveService.getAllLeavesForAdmin();
-      } else {
-        data = await LeaveService.getLeavesByUserId(currentUserId);
-      }
+      data = await LeaveService.getLeavesByUserId(currentUserId);
 
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
