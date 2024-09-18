@@ -7,6 +7,7 @@ const {
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 const transporter = require("../utils/Mailer");
+const CONSTANTS = require("../constants");
 
 module.exports.LeaveService = {
   // Get leaves by userId (for regular users)
@@ -93,6 +94,7 @@ module.exports.LeaveService = {
         status: "pending",
       });
 
+      const applyLeaveLink = `${CONSTANTS.LEAVE_URL}`;
       const mailOptions = {
         from: user.officialEmail,
         to: manager.officialEmail,
@@ -102,7 +104,8 @@ module.exports.LeaveService = {
           dayType === 1 ? "full day" : "half day"
         } ${leaveType} leave from ${leaveStart} to ${leaveEnd}.</p>
         <p>Reason: ${reason}</p>
-        <p>Kindly review and approve/reject the leave.</p>`,
+        <p>Kindly click the link below to review and approve/reject the leave:</p>
+        <a href="${applyLeaveLink}">Click here</a>`,
       };
       await transporter.sendMail(mailOptions);
 
@@ -122,13 +125,14 @@ module.exports.LeaveService = {
 
       const user = await User.findById(leave.userId);
       const manager = await User.findById(managerId);
-
+      const approveLeaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
       const mailOptions = {
         from: manager.officialEmail,
         to: user.officialEmail,
         subject: "Leave Approved",
         html: `<p>Hello ${user.firstName},</p>
-      <p>Your leave has been approved.</p>`,
+      <p>Your leave has been approved, Click on the below link to Check.</p>
+      <a href="${approveLeaveLink}">Click Here</a>`,
       };
       await transporter.sendMail(mailOptions);
 
@@ -149,12 +153,14 @@ module.exports.LeaveService = {
       const user = await User.findById(leave.userId);
       const manager = await User.findById(managerId);
 
+      const leaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
       const mailOptions = {
         from: manager.officialEmail,
         to: user.officialEmail,
         subject: "Leave Rejected",
         html: `<p>Hello ${user.firstName},</p>
-             <p>Your leave on ${leave.leaveDate} has been rejected.</p>`,
+             <p>Your leave has been rejected, Click on the below link to Check.</p>
+      <a href="${leaveLink}">Click Here</a>`,
       };
       await transporter.sendMail(mailOptions);
 
