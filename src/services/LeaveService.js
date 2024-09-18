@@ -1,4 +1,9 @@
-const { UnauthorizedError } = require("../exceptions");
+const mongoose = require("mongoose");
+const {
+  UnauthorizedError,
+  NotFoundError,
+  ValidationError,
+} = require("../exceptions");
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 const transporter = require("../utils/Mailer");
@@ -11,7 +16,50 @@ module.exports.LeaveService = {
 
   // Get leaves by managerId (for 2nd level managers or admin)
   getLeavesByManagerId: async (managerId) => {
-    return await Leave.find({ managerId }).sort({ leaveDate: -1 });
+    try {
+      const leaves = await Leave.aggregate([
+        { $match: { managerId: new mongoose.Types.ObjectId(managerId) } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            userName: {
+              $concat: ["$userInfo.firstName", " ", "$userInfo.lastName"],
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            userId: 1,
+            managerid: 1,
+            userName: 1,
+            leaveStart: 1,
+            leaveEnd: 1,
+            leaveType: 1,
+            dayType: 1,
+            reason: 1,
+            status: 1,
+          },
+        },
+      ]);
+
+      return leaves;
+    } catch (error) {
+      throw new NotFoundError(error.message);
+    }
   },
 
   getAllLeavesForAdmin: async () => {
@@ -24,40 +72,44 @@ module.exports.LeaveService = {
   },
 
   createLeave: async (leaveData) => {
-    const { userId, leaveStart, leaveEnd, leaveType, dayType, reason } =
-      leaveData;
+    try {
+      const { userId, leaveStart, leaveEnd, leaveType, dayType, reason } =
+        leaveData;
 
-    const user = await User.findById(userId);
-    if (!user) throw new Error("User not found");
+      const user = await User.findById(userId);
+      if (!user) throw new Error("User not found");
 
-    const manager = await User.findById(user.parent_id);
-    if (!manager) throw new Error("Manager not found");
+      const manager = await User.findById(user.parent_id);
+      if (!manager) throw new Error("Manager not found");
 
-    const newLeave = await Leave.create({
-      userId,
-      managerId: user.parent_id,
-      leaveStart,
-      leaveEnd,
-      leaveType,
-      dayType,
-      reason,
-      status: "pending",
-    });
+      const newLeave = await Leave.create({
+        userId,
+        managerId: user.parent_id,
+        leaveStart,
+        leaveEnd,
+        leaveType,
+        dayType,
+        reason,
+        status: "pending",
+      });
 
-    const mailOptions = {
-      from: user.officialEmail,
-      to: manager.officialEmail,
-      subject: "New Leave Application",
-      html: `<p>Hello ${manager.firstName},</p>
-             <p>${user.firstName} has applied for ${
-        dayType === 1 ? "full day" : "half day"
-      } ${leaveType} leave from ${leaveStart} to ${leaveEnd}.</p>
-             <p>Reason: ${reason}</p>
-             <p>Kindly review and approve/reject the leave.</p>`,
-    };
-    await transporter.sendMail(mailOptions);
+      const mailOptions = {
+        from: user.officialEmail,
+        to: manager.officialEmail,
+        subject: "New Leave Application",
+        html: `<p>Hello ${manager.firstName},</p>
+      <p>${user.firstName} has applied for ${
+          dayType === 1 ? "full day" : "half day"
+        } ${leaveType} leave from ${leaveStart} to ${leaveEnd}.</p>
+        <p>Reason: ${reason}</p>
+        <p>Kindly review and approve/reject the leave.</p>`,
+      };
+      await transporter.sendMail(mailOptions);
 
-    return newLeave;
+      return newLeave;
+    } catch (error) {
+      throw new ValidationError(error.message);
+    }
   },
 
   approveLeave: async (leaveId, managerId) => {
