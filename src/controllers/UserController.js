@@ -14,12 +14,17 @@ module.exports = {
       const currentUserId = req.auth.userId;
       const query = req.query.query;
       const includeSelf = req.query.includeSelf === "true";
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
 
       let data;
       if (query && !query.includeSelf) {
         data = await UserService.searchUsers(query, currentUserId);
       } else {
-        data = await UserService.getAllUsers(currentUserId, includeSelf);
+        data = await UserService.getAllUsers(currentUserId, includeSelf, {
+          page,
+          limit,
+        });
       }
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {

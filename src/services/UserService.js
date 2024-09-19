@@ -13,19 +13,27 @@ const {
 } = require("../utils/QueryBuilder");
 
 module.exports.UserService = {
-  getAllUsers: async (currentUserId, includeSelf) => {
+  getAllUsers: async (currentUserId, includeSelf, { page, limit }) => {
     try {
+      const skips = (page - 1) * limit;
       const users = await getRecordsByKey(TABLE_NAMES.USERS, {
         userState: "active",
       });
+      let filteredUsers = users;
       if (!includeSelf) {
-        const filteredUsers = users.filter(
+        filteredUsers = users.filter(
           (user) => user._id.toString() !== currentUserId.toString()
         );
-        return filteredUsers;
-      } else {
-        return users;
       }
+
+      const paginatedUsers = filteredUsers.slice(skips, skips + limit);
+
+      return {
+        users: paginatedUsers,
+        totalRecords: filteredUsers.length,
+        totalPages: Math.ceil(filteredUsers.length / limit),
+        curentPage: page,
+      };
     } catch (error) {
       throw new Error("Error fetching users: " + error.message);
     }
@@ -39,7 +47,6 @@ module.exports.UserService = {
       }
       return user;
     } catch (error) {
-      // throw new NotFoundError({message:error.message});
       throw new NotFoundError(error.message);
     }
   },
