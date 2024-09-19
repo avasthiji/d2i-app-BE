@@ -31,11 +31,11 @@ module.exports.LeaveService = {
       .skip(skips)
       .limit(parseInt(limit));
 
-    const totalLeaves = await Leave.countDocuments(query);
+    const totalRecords = await Leave.countDocuments(query);
     return {
       leaves,
-      totalLeaves,
-      totalPages: Math.ceil(totalLeaves / limit),
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / limit),
       currentPage: parseInt(page),
     };
   },
@@ -57,6 +57,13 @@ module.exports.LeaveService = {
       }
 
       if (status) {
+        if (
+          status !== "approved" &&
+          status !== "rejected" &&
+          status !== "pending"
+        ) {
+          throw new Error("Invalid status, Try sending valid one.");
+        }
         match.status = status;
       }
 
@@ -112,15 +119,15 @@ module.exports.LeaveService = {
         .skip(skips)
         .limit(parseInt(limit));
 
-      const totalLeaves = await Leave.countDocuments(match);
+      const totalRecords = await Leave.countDocuments(match);
       return {
         leaves,
-        totalLeaves,
-        totalPages: Math.ceil(totalLeaves / limit),
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
         currentPage: parseInt(page),
       };
     } catch (error) {
-      throw new NotFoundError(error.message);
+      throw new ValidationError(error.message);
     }
   },
 
