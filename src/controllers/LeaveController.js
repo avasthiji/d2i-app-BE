@@ -6,14 +6,14 @@ module.exports = {
   index: async (req, res, next) => {
     try {
       const currentUserId = req.auth.userId;
-      const {is_admin} = req.auth;
-      let data;
+      const { page = 1, limit = 10, month, year } = req.query;
 
-      if(is_admin){
-        data = await LeaveService.getAllLeaves();
-      }else{
-        data = await LeaveService.getLeavesByUserId(currentUserId);
-      }
+      const data = await LeaveService.getLeavesByUserId(currentUserId, {
+        page,
+        limit,
+        month,
+        year,
+      });
 
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
@@ -25,15 +25,18 @@ module.exports = {
   // Show:  For managers/admin to view leaves submitted by their subordinates
   show: async (req, res, next) => {
     try {
-      const managerId = req.auth.userId;
-      const {is_admin} = req.auth;
-      let leaves;
+      const { userId: managerId, is_admin } = req.auth;
+      const { page = 1, limit = 10, status, month, year } = req.query;
 
-      if(is_admin){
-        leaves = await LeaveService.getAllLeaves();
-      }else{
-        leaves = await LeaveService.getLeavesByManagerId(managerId);
-      }
+      const leaves = await LeaveService.getLeavesByManagerIdorAdmin({
+        managerId,
+        is_admin,
+        page,
+        limit,
+        status,
+        month,
+        year,
+      });
 
       res.status(200).json(ApiResponse("success", leaves));
     } catch (error) {
@@ -80,18 +83,25 @@ module.exports = {
       const leaveId = req.params.leave_id;
       const { status } = req.body;
       const managerId = req.auth.userId;
-      const {is_admin} = req.auth;
+      const { is_admin } = req.auth;
 
       // console.log('logging req.auth');
       // console.log(req.auth);
-      
 
       let updatedLeave;
 
       if (status === "approved") {
-        updatedLeave = await LeaveService.approveLeave(leaveId, managerId, is_admin);
+        updatedLeave = await LeaveService.approveLeave(
+          leaveId,
+          managerId,
+          is_admin
+        );
       } else if (status === "rejected") {
-        updatedLeave = await LeaveService.rejectLeave(leaveId, managerId,is_admin);
+        updatedLeave = await LeaveService.rejectLeave(
+          leaveId,
+          managerId,
+          is_admin
+        );
       } else {
         return res.status(400).json({ message: "Invalid status provided" });
       }

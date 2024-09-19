@@ -11,55 +11,67 @@ const CONSTANTS = require("../constants");
 
 module.exports.LeaveService = {
   // Get leaves by userId (for regular users)
-  getLeavesByUserId: async (userId) => {
-    return await Leave.find({ userId }).sort({ leaveStart: -1 });
+  getLeavesByUserId: async (userId, { page = 1, limit = 10, month, year }) => {
+    const query = { userId };
+
+    //filter by  month
+    if (month) {
+      const currentYear = new Date().getFullYear();
+      const yearParam = year || currentYear;
+      const startDate = new Date(`${yearParam}-${month}-01`);
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      query.leaveStart = { $gte: startDate, $lt: endDate };
+    }
+
+    //pagination and sorting by leaveStart
+    const skips = (page - 1) * limit;
+    const leaves = await Leave.find(query)
+      .sort({ leaveStart: -1 })
+      .skip(skips)
+      .limit(parseInt(limit));
+
+    const totalLeaves = await Leave.countDocuments(query);
+    return {
+      leaves,
+      totalLeaves,
+      totalPages: Math.ceil(totalLeaves / limit),
+      currentPage: parseInt(page),
+    };
   },
 
-  //get all leaves
-  getAllLeaves: async () => {
-    return await Leave.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "userInfo",
-        },
-      },
-      {
-        $unwind: {
-          path: "$userInfo",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $addFields: {
-          userName: {
-            $concat: ["$userInfo.firstName", " ", "$userInfo.lastName"],
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          userId: 1,
-          userName: 1,
-          leaveStart: 1,
-          leaveEnd: 1,
-          leaveType: 1,
-          dayType: 1,
-          reason: 1,
-          status: 1,
-        },
-      },
-    ]).sort({ leaveStart: -1 });
-  },
-
-  // Get leaves by managerId (for 2nd level managers or admin) //now only for manager
-  getLeavesByManagerId: async (managerId) => {
+  // Get leaves by managerId (for 2nd level managers or admin)
+  getLeavesByManagerIdorAdmin: async ({
+    managerId,
+    is_admin,
+    page = 1,
+    limit = 10,
+    status,
+    month,
+    year,
+  }) => {
     try {
+      const match = {};
+      if (!is_admin) {
+        match.managerId = new mongoose.Types.ObjectId(managerId);
+      }
+
+      if (status) {
+        match.status = status;
+      }
+
+      if (month) {
+        const currentYear = new Date().getFullYear();
+        const yearParam = year || currentYear;
+        const startDate = new Date(`${yearParam}-${month}-01`);
+        const endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + 1);
+        match.leaveStart = { $gte: startDate, $lt: endDate };
+      }
+
+      const skips = (page - 1) * limit;
       const leaves = await Leave.aggregate([
-        { $match: { managerId: new mongoose.Types.ObjectId(managerId) } },
+        { $match: match },
         {
           $lookup: {
             from: "users",
@@ -95,9 +107,18 @@ module.exports.LeaveService = {
             status: 1,
           },
         },
-      ]).sort({ leaveStart: -1 });
+      ])
+        .sort({ leaveStart: -1 })
+        .skip(skips)
+        .limit(parseInt(limit));
 
-      return leaves;
+      const totalLeaves = await Leave.countDocuments(match);
+      return {
+        leaves,
+        totalLeaves,
+        totalPages: Math.ceil(totalLeaves / limit),
+        currentPage: parseInt(page),
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }
@@ -179,8 +200,8 @@ module.exports.LeaveService = {
       const leave = await Leave.findById(leaveId);
       if (!leave) throw new Error("Leave not found");
 
-      if(!is_admin && leave.managerId.toString() !== managerId){
-         throw new Error("You are not authorized to approve this leave.");
+      if (!is_admin && leave.managerId.toString() !== managerId) {
+        throw new Error("You are not authorized to approve this leave.");
       }
 
       if (leave.status !== "pending") {
@@ -211,12 +232,12 @@ module.exports.LeaveService = {
 
   rejectLeave: async (leaveId, managerId) => {
     try {
-       const leave = await Leave.findById(leaveId);
-       if (!leave) throw new Error("Leave not found");
+      const leave = await Leave.findById(leaveId);
+      if (!leave) throw new Error("Leave not found");
 
-       if (!is_admin && leave.managerId.toString() !== managerId) {
-         throw new Error("You are not authorized to reject this leave.");
-       }
+      if (!is_admin && leave.managerId.toString() !== managerId) {
+        throw new Error("You are not authorized to reject this leave.");
+      }
 
       if (leave.status !== "pending") {
         throw new Error("Leave has already been processed.");
