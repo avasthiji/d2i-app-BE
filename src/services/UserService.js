@@ -15,23 +15,24 @@ const {
 module.exports.UserService = {
   getAllUsers: async (currentUserId, includeSelf, { page, limit }) => {
     try {
-      const skips = (page - 1) * limit;
-      const users = await getRecordsByKey(TABLE_NAMES.USERS, {
-        userState: "active",
-      });
-      let filteredUsers = users;
-      if (!includeSelf) {
-        filteredUsers = users.filter(
-          (user) => user._id.toString() !== currentUserId.toString()
-        );
-      }
+      const filter = { userState: "active" };
 
-      const paginatedUsers = filteredUsers.slice(skips, skips + limit);
+      if (!includeSelf) {
+        filter._id = { $ne: currentUserId };
+      }
+      const skips = (page - 1) * limit;
+
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, filter, {
+        limit,
+        skip: skips,
+      });
+
+      const totalRecords = await getRecordsByKey(TABLE_NAMES.USERS, filter);
 
       return {
-        users: paginatedUsers,
-        totalRecords: filteredUsers.length,
-        totalPages: Math.ceil(filteredUsers.length / limit),
+        users: users,
+        totalRecords: totalRecords.length,
+        totalPages: Math.ceil(totalRecords.length / limit),
         curentPage: page,
       };
     } catch (error) {

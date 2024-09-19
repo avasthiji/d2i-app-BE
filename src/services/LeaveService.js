@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
-const {
-  UnauthorizedError,
-  NotFoundError,
-  ValidationError,
-} = require("../exceptions");
+const { ValidationError } = require("../exceptions");
 const Leave = require("../models/Leave");
-const User = require("../models/User");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
+const {
+  getRecordsByKey,
+  getRecordByKey,
+  insertRecord,
+  updateRecordsByKey,
+} = require("../utils/QueryBuilder");
+const { TABLE_NAMES } = require("../utils/db");
 
 module.exports.LeaveService = {
   // Get leaves by userId (for regular users)
@@ -26,10 +28,12 @@ module.exports.LeaveService = {
 
     //pagination and sorting by leaveStart
     const skips = (page - 1) * limit;
-    const leaves = await Leave.find(query)
-      .sort({ leaveStart: -1 })
-      .skip(skips)
-      .limit(parseInt(limit));
+    const leaves = await getRecordsByKey(TABLE_NAMES.LEAVE, query, {
+      limit,
+      skip: skips,
+      sortField: "leaveStart",
+      sortOrder: "desc",
+    });
 
     const totalRecords = await Leave.countDocuments(query);
     return {
@@ -150,7 +154,7 @@ module.exports.LeaveService = {
         );
       }
 
-      const overlappingLeave = await Leave.findOne({
+      const overlappingLeave = await getRecordByKey(TABLE_NAMES.LEAVE, {
         userId,
         $or: [
           { leaveStart: { $lte: leaveEnd }, leaveEnd: { $gte: leaveStart } },
@@ -164,13 +168,15 @@ module.exports.LeaveService = {
         );
       }
 
-      const user = await User.findById(userId);
+      const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
       if (!user) throw new Error("User not found");
 
-      const manager = await User.findById(user.parent_id);
+      const manager = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: user.parent_id,
+      });
       if (!manager) throw new Error("Manager not found");
 
-      const newLeave = await Leave.create({
+      const newLeave = await insertRecord(TABLE_NAMES.LEAVE, {
         userId,
         managerId: user.parent_id,
         leaveStart,
@@ -204,7 +210,7 @@ module.exports.LeaveService = {
 
   approveLeave: async (leaveId, managerId, is_admin) => {
     try {
-      const leave = await Leave.findById(leaveId);
+      const leave = await getRecordByKey(TABLE_NAMES.LEAVE, { _id: leaveId });
       if (!leave) throw new Error("Leave not found");
 
       if (!is_admin && leave.managerId.toString() !== managerId) {
@@ -215,11 +221,18 @@ module.exports.LeaveService = {
         throw new Error("Leave has already been processed.");
       }
 
-      leave.status = "approved";
-      await leave.save();
+      const updatedLeave = await updateRecordsByKey(
+        TABLE_NAMES.LEAVE,
+        { _id: leaveId },
+        { status: "approved" }
+      );
 
-      const user = await User.findById(leave.userId);
-      const manager = await User.findById(managerId);
+      const user = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: leave.userId,
+      });
+      const manager = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: managerId,
+      });
       const approveLeaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
       const mailOptions = {
         from: manager.officialEmail,
@@ -231,15 +244,15 @@ module.exports.LeaveService = {
       };
       await transporter.sendMail(mailOptions);
 
-      return leave;
+      return updatedLeave;
     } catch (error) {
       throw new ValidationError(error.message);
     }
   },
 
-  rejectLeave: async (leaveId, managerId) => {
+  rejectLeave: async (leaveId, managerId, is_admin) => {
     try {
-      const leave = await Leave.findById(leaveId);
+      const leave = await getRecordByKey(TABLE_NAMES.LEAVE, { _id: leaveId });
       if (!leave) throw new Error("Leave not found");
 
       if (!is_admin && leave.managerId.toString() !== managerId) {
@@ -250,11 +263,18 @@ module.exports.LeaveService = {
         throw new Error("Leave has already been processed.");
       }
 
-      leave.status = "rejected";
-      await leave.save();
+      const updatedLeave = await updateRecordsByKey(
+        TABLE_NAMES.LEAVE,
+        { _id: leaveId },
+        { status: "rejected" }
+      );
 
-      const user = await User.findById(leave.userId);
-      const manager = await User.findById(managerId);
+      const user = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: leave.userId,
+      });
+      const manager = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: managerId,
+      });
 
       const leaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
       const mailOptions = {
@@ -267,7 +287,7 @@ module.exports.LeaveService = {
       };
       await transporter.sendMail(mailOptions);
 
-      return leave;
+      return updatedLeave;
     } catch (error) {
       throw new ValidationError(error.message);
     }
