@@ -91,8 +91,9 @@ module.exports.AttendanceService = {
     }
   },
 
-  getAllRecords: async (date) => {
+  getAllRecords: async (date, { page, limit }) => {
     try {
+      const skips = (page - 1) * limit;
       const attendanceRecords = await Attendance.aggregate([
         {
           $match: { attendanceDate: new Date(date) },
@@ -126,8 +127,20 @@ module.exports.AttendanceService = {
             isHoliday: { $first: "$isHoliday" },
           },
         },
+        { $skip: skips },
+        { $limit: limit },
       ]);
-      return attendanceRecords.length > 0 ? attendanceRecords[0] : null;
+
+      const totalRecords = await TABLE_NAMES.ATTENDANCE.countDocuments({
+        attendanceDate: new Date(date),
+      });
+
+      return {
+        records: attendanceRecords.length > 0 ? attendanceRecords[0] : null,
+        totalRecords,
+        totlaPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new BadRequestError(error.message);
     }

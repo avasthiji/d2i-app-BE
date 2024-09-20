@@ -66,17 +66,27 @@ module.exports.MetricService = {
     }
   },
   // Fetch all parent metrics (i.e., metrics with parent_id == null)
-  getParentMetrics: async () => {
+  getParentMetrics: async ({ page, limit }) => {
     try {
-      const parentMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
+      const skip = (page - 1) * limit;
+      const parentMetrics = await getRecordsByKey(
+        TABLE_NAMES.METRICS,
+        {
+          parent_id: null,
+        },
+        { limit, skip }
+      );
+
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments({
         parent_id: null,
       });
 
-      if (!parentMetrics || parentMetrics.length === 0) {
-        return ApiResponse("success", []);
-      }
-
-      return ApiResponse("success", parentMetrics);
+      return {
+        metrics: parentMetrics,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new Error("Error fetching parent metrics: " + error.message);
     }
@@ -98,28 +108,41 @@ module.exports.MetricService = {
   //     throw new Error("Error fetching child metrics: " + error.message);
   //   }
   // },
-  getChildMetricsByParentId: async (metricId) => {
+  getChildMetricsByParentId: async (metricId, { page, limit }) => {
     try {
       const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {
         _id: metricId,
       });
 
       if (!parentMetric) {
-        return null;
+        return {
+          parentMetric: null,
+          sub_metrics: [],
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: 1,
+        };
       }
-      const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
+      const skip = (page - 1) * limit;
+      const childMetrics = await getRecordsByKey(
+        TABLE_NAMES.METRICS,
+        {
+          parent_id: metricId,
+        },
+        { limit, skip }
+      );
+
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments({
         parent_id: metricId,
       });
 
-      if (!childMetrics) {
-        return null;
-      }
-      const result = {
-        ...parentMetric._doc,
+      return {
+        parentMetric: parentMetric._doc,
         sub_metrics: childMetrics,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
       };
-
-      return result;
     } catch (error) {
       throw new NotFoundError(error.message);
     }
