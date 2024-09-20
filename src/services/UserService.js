@@ -1,7 +1,6 @@
 const { NotFoundError } = require("../exceptions");
 const moment = require("moment");
 const crypto = require("crypto");
-const User = require("../models/User");
 const { TABLE_NAMES } = require("../utils/db");
 const {
   getRecordsByKey,
@@ -117,8 +116,12 @@ module.exports.UserService = {
       throw new Error("Error Soft Deleting user" + error.message);
     }
   },
-  searchUsers: async (query, currentUserId) => {
+  searchUsers: async (query, currentUserId, { page, limit }) => {
     try {
+      const skip = (page - 1) * limit;
+
+      const isNumericQuery = !isNaN(query);
+
       const searchQuery = {
         $and: [
           { _id: { $ne: currentUserId } }, // Exclude current user
@@ -127,18 +130,34 @@ module.exports.UserService = {
               { firstName: { $regex: query, $options: "i" } },
               { lastName: { $regex: query, $options: "i" } },
               { officialEmail: { $regex: query, $options: "i" } },
+              // { employeeId: { $regex: query, $options: "i" } },
+              { alternateEmail: { $regex: query, $options: "i" } },
+              { role: { $regex: query, $options: "i" } },
+              { bloodGroup: { $regex: query, $options: "i" } },
+              { birthday: { $regex: query, $options: "i" } },
+              { contactNumber: { $regex: query, $options: "i" } },
+              { alternateContactNumber: { $regex: query, $options: "i" } },
+
+              ...(isNumericQuery ? [{ employeeId: query }] : []),
             ],
           },
         ],
         userState: "active", // for non-deleted user only
       };
 
-      const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery);
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery, {
+        limit,
+        skip,
+      });
 
-      if (!users.length) {
-        return null;
-      }
-      return users;
+      const totalRecords = await TABLE_NAMES.USERS.countDocuments(searchQuery);
+
+      return {
+        users,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }

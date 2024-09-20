@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-// const {CONSTANST} = require('../constants/index');
 const { UserService } = require("../services/UserService");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
@@ -19,7 +18,10 @@ module.exports = {
 
       let data;
       if (query && !query.includeSelf) {
-        data = await UserService.searchUsers(query, currentUserId);
+        data = await UserService.searchUsers(query, currentUserId, {
+          page,
+          limit,
+        });
       } else {
         data = await UserService.getAllUsers(currentUserId, includeSelf, {
           page,

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { NotFoundError } = require("../exceptions");
+const { NotFoundError, ValidationError } = require("../exceptions");
 const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
@@ -38,11 +38,12 @@ module.exports.RewardService = {
 
       return ApiResponse("success", newReward);
     } catch (error) {
-      throw new Error("Error assigning points: " + error.message);
+      throw new ValidationError("Error assigning points: " + error.message);
     }
   },
-  getRewardsById: async (userId) => {
+  getRewardsById: async (userId, { page, limit }) => {
     try {
+      const skip = (page - 1) * limit;
       const rewards = await Reward.aggregate([
         {
           $match: { user_id: new mongoose.Types.ObjectId(userId) },
@@ -125,13 +126,20 @@ module.exports.RewardService = {
             metricParentName: { $ifNull: ["$metricParentName", null] },
           },
         },
-      ]);
+      ])
+        .skip(skip)
+        .limit(limit);
 
-      if (!rewards || rewards.length === 0) {
-        return ApiResponse("success", []);
-      }
+      const totalRecords = await TABLE_NAMES.REWARDS.countDocuments({
+        user_id: new mongoose.Types.ObjectId(userId),
+      });
 
-      return ApiResponse("success", rewards);
+      return {
+        rewards: rewards || null,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }
