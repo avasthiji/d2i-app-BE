@@ -131,14 +131,25 @@ module.exports.AttendanceService = {
         { $limit: limit },
       ]);
 
-      const totalRecords = await TABLE_NAMES.ATTENDANCE.countDocuments({
-        attendanceDate: new Date(date),
-      });
+      const employeeCount = await TABLE_NAMES.ATTENDANCE.aggregate([
+        {
+          $match: { attendanceDate: new Date(date) },
+        },
+        {
+          $unwind: "$employees",
+        },
+        {
+          $count: "totalEmployees",
+        },
+      ]);
+
+      const totalRecords =
+        employeeCount.length > 0 ? employeeCount[0].totalEmployees : 0;
 
       return {
         records: attendanceRecords.length > 0 ? attendanceRecords[0] : null,
         totalRecords,
-        totlaPages: Math.ceil(totalRecords / limit),
+        totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
       };
     } catch (error) {

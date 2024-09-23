@@ -11,7 +11,7 @@ module.exports = {
   index: async (req, res, next) => {
     try {
       const currentUserId = req.auth.userId;
-      const query = req.query.query;
+      const query = req.query.q;
       const includeSelf = req.query.includeSelf === "true";
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
