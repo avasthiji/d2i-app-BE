@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-// const {CONSTANST} = require('../constants/index');
 const { UserService } = require("../services/UserService");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
@@ -12,14 +11,22 @@ module.exports = {
   index: async (req, res, next) => {
     try {
       const currentUserId = req.auth.userId;
-      const query = req.query.query;
+      const query = req.query.q;
       const includeSelf = req.query.includeSelf === "true";
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
 
       let data;
       if (query && !query.includeSelf) {
-        data = await UserService.searchUsers(query, currentUserId);
+        data = await UserService.searchUsers(query, currentUserId, {
+          page,
+          limit,
+        });
       } else {
-        data = await UserService.getAllUsers(currentUserId, includeSelf);
+        data = await UserService.getAllUsers(currentUserId, includeSelf, {
+          page,
+          limit,
+        });
       }
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {

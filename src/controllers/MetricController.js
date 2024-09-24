@@ -4,8 +4,12 @@ const { ApiResponse } = require("../utils/ApiHelper");
 module.exports = {
   index: async (req, res, next) => {
     try {
-      const data = await MetricService.getParentMetrics();
-      res.status(200).json(data);
+      const { page = 1, limit = 10, q } = req.query;
+      const data = await MetricService.getParentMetrics(q, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
+      res.status(200).json(ApiResponse("success", data));
     } catch (error) {
       console.log(error);
       next(error);
@@ -14,8 +18,12 @@ module.exports = {
 
   show: async (req, res, next) => {
     try {
+      const { page = 1, limit = 10, q } = req.query;
       const parentId = req.params.metrics_id;
-      const data = await MetricService.getChildMetricsByParentId(parentId);
+      const data = await MetricService.getChildMetricsByParentId(parentId, q, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
 
       if (!data) {
         res.status(200).json(ApiResponse("success", data));

@@ -1,12 +1,12 @@
 module.exports.ValidationError = function (errors = {}) {
   // errors ex. {"email": "email is not unique"}
-  this.message = `${errors.message || "validation errors occurred."}`;
+  this.message = `${errors || "validation errors occurred."}`;
   this.code = 422;
   // this.errors = errors;
 };
 
-module.exports.UnauthorizedError = function () {
-  this.message = "Unauthorized";
+module.exports.UnauthorizedError = function (errors = {}) {
+  this.message = `${errors.message || "Unauthorized"}`;
   this.code = 401;
 };
 

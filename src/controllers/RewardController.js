@@ -1,4 +1,5 @@
 const { RewardService } = require("../services/RewardService");
+const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
   create: async (req, res, next) => {
@@ -22,10 +23,14 @@ module.exports = {
   },
   show: async (req, res, next) => {
     try {
+      const { page = 1, limit = 10 } = req.query;
       const userId = req.auth.userId;
-      const data = await RewardService.getRewardsById(userId);
+      const data = await RewardService.getRewardsById(userId, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
 
-      res.status(200).json(data);
+      res.status(200).json(ApiResponse("success", data));
     } catch (error) {
       console.log(error);
       next(error);

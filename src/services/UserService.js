@@ -1,7 +1,6 @@
 const { NotFoundError } = require("../exceptions");
 const moment = require("moment");
 const crypto = require("crypto");
-const User = require("../models/User");
 const { TABLE_NAMES } = require("../utils/db");
 const {
   getRecordsByKey,
@@ -13,19 +12,28 @@ const {
 } = require("../utils/QueryBuilder");
 
 module.exports.UserService = {
-  getAllUsers: async (currentUserId, includeSelf) => {
+  getAllUsers: async (currentUserId, includeSelf, { page, limit }) => {
     try {
-      const users = await getRecordsByKey(TABLE_NAMES.USERS, {
-        userState: "active",
-      });
+      const filter = { userState: "active" };
+
       if (!includeSelf) {
-        const filteredUsers = users.filter(
-          (user) => user._id.toString() !== currentUserId.toString()
-        );
-        return filteredUsers;
-      } else {
-        return users;
+        filter._id = { $ne: currentUserId };
       }
+      const skips = (page - 1) * limit;
+
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, filter, {
+        limit,
+        skip: skips,
+      });
+
+      const totalRecords = await getRecordsByKey(TABLE_NAMES.USERS, filter);
+
+      return {
+        users: users,
+        totalRecords: totalRecords.length,
+        totalPages: Math.ceil(totalRecords.length / limit),
+        curentPage: page,
+      };
     } catch (error) {
       throw new Error("Error fetching users: " + error.message);
     }
@@ -39,7 +47,6 @@ module.exports.UserService = {
       }
       return user;
     } catch (error) {
-      // throw new NotFoundError({message:error.message});
       throw new NotFoundError(error.message);
     }
   },
@@ -52,10 +59,14 @@ module.exports.UserService = {
         "desc"
       );
 
-      let newEmployeeId = 1;
+      let newEmployeeIdNumber = 1;
       if (latestUser && latestUser?.employeeId) {
-        newEmployeeId = latestUser.employeeId + 1;
+        const latestEmployeeId = parseInt(
+          latestUser.employeeId.replace("d2i_", "")
+        );
+        newEmployeeIdNumber = latestEmployeeId + 1;
       }
+      const newEmployeeId = `d2i_${newEmployeeIdNumber}`;
 
       //generate inviteCode
       const inviteCode = crypto.randomBytes(16).toString("hex");
@@ -109,8 +120,9 @@ module.exports.UserService = {
       throw new Error("Error Soft Deleting user" + error.message);
     }
   },
-  searchUsers: async (query, currentUserId) => {
+  searchUsers: async (query, currentUserId, { page, limit }) => {
     try {
+      const skip = (page - 1) * limit;
       const searchQuery = {
         $and: [
           { _id: { $ne: currentUserId } }, // Exclude current user
@@ -119,18 +131,32 @@ module.exports.UserService = {
               { firstName: { $regex: query, $options: "i" } },
               { lastName: { $regex: query, $options: "i" } },
               { officialEmail: { $regex: query, $options: "i" } },
+              { employeeId: { $regex: query, $options: "i" } },
+              { alternateEmail: { $regex: query, $options: "i" } },
+              { role: { $regex: query, $options: "i" } },
+              { bloodGroup: { $regex: query, $options: "i" } },
+              { birthday: { $regex: query, $options: "i" } },
+              { contactNumber: { $regex: query, $options: "i" } },
+              { alternateContactNumber: { $regex: query, $options: "i" } },
             ],
           },
         ],
         userState: "active", // for non-deleted user only
       };
 
-      const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery);
+      const users = await getRecordsByKey(TABLE_NAMES.USERS, searchQuery, {
+        limit,
+        skip,
+      });
 
-      if (!users.length) {
-        return null;
-      }
-      return users;
+      const totalRecords = await TABLE_NAMES.USERS.countDocuments(searchQuery);
+
+      return {
+        users,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }

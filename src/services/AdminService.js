@@ -12,10 +12,14 @@ module.exports.AdminService = {
         "desc"
       );
 
-      let newEmployeeId = 1;
+      let newEmployeeIdNumber = 1;
       if (latestUser) {
-        newEmployeeId = latestUser.employeeId + 1;
+        const latestEmployeeId = parseInt(
+          latestUser.employeeId.replace("d2i_", "")
+        );
+        newEmployeeIdNumber = latestEmployeeId + 1;
       }
+      const newEmployeeId = `d2i_${newEmployeeIdNumber}`;
 
       const newAdmin = await insertRecord(TABLE_NAMES.USERS, {
         ...userData,

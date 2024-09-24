@@ -91,8 +91,18 @@ module.exports.AttendanceService = {
     }
   },
 
-  getAllRecords: async (date) => {
+  getAllRecords: async (date, q, { page, limit }) => {
     try {
+      const skips = (page - 1) * limit;
+      const searchQuery = {};
+      if (q) {
+        searchQuery["$or"] = [
+          { "userDetails.firstName": { $regex: q, $options: "i" } },
+          { "userDetails.lastName": { $regex: q, $options: "i" } },
+          { "userDetails.officialEmail": { $regex: q, $options: "i" } },
+          { "employees.timesheet": { $regex: q, $options: "i" } },
+        ];
+      }
       const attendanceRecords = await Attendance.aggregate([
         {
           $match: { attendanceDate: new Date(date) },
@@ -111,6 +121,7 @@ module.exports.AttendanceService = {
         {
           $unwind: "$userDetails",
         },
+        { $match: searchQuery },
         {
           $addFields: {
             "employees.userName": {
@@ -126,8 +137,31 @@ module.exports.AttendanceService = {
             isHoliday: { $first: "$isHoliday" },
           },
         },
+        { $skip: skips },
+        { $limit: limit },
       ]);
-      return attendanceRecords.length > 0 ? attendanceRecords[0] : null;
+
+      const employeeCount = await TABLE_NAMES.ATTENDANCE.aggregate([
+        {
+          $match: { attendanceDate: new Date(date) },
+        },
+        {
+          $unwind: "$employees",
+        },
+        {
+          $count: "totalEmployees",
+        },
+      ]);
+
+      const totalRecords =
+        employeeCount.length > 0 ? employeeCount[0].totalEmployees : 0;
+
+      return {
+        records: attendanceRecords.length > 0 ? attendanceRecords[0] : null,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new BadRequestError(error.message);
     }

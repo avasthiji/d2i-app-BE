@@ -26,9 +26,24 @@ const getRecordByKey = async function (TABLENAME, filter) {
     return error.message;
   }
 };
-const getRecordsByKey = async function (TABLENAME, filter) {
+const getRecordsByKey = async function (
+  TABLENAME,
+  filter,
+  { limit, skip, sortField, sortOrder = "desc" } = {}
+) {
   try {
-    const records = await TABLENAME.find(filter);
+    let query = TABLENAME.find(filter);
+
+    if (sortField) {
+      query = query.sort({ [sortField]: sortOrder === "desc" ? -1 : 1 });
+    }
+    if (skip !== undefined) {
+      query = query.skip(skip);
+    }
+    if (limit !== undefined) {
+      query = query.limit(limit);
+    }
+    const records = await query.exec();
     return records;
   } catch (error) {
     return error.message;

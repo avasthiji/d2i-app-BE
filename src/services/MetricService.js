@@ -1,3 +1,4 @@
+const { options } = require("joi");
 const { NotFoundError } = require("../exceptions");
 const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
@@ -66,17 +67,32 @@ module.exports.MetricService = {
     }
   },
   // Fetch all parent metrics (i.e., metrics with parent_id == null)
-  getParentMetrics: async () => {
+  getParentMetrics: async (q, { page, limit }) => {
     try {
-      const parentMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
+      const skip = (page - 1) * limit;
+      const searchQuery = {
         parent_id: null,
-      });
-
-      if (!parentMetrics || parentMetrics.length === 0) {
-        return ApiResponse("success", []);
+      };
+      if (q) {
+        searchQuery["$or"] = [{ label: { $regex: q, $options: "i" } }];
       }
+      const parentMetrics = await getRecordsByKey(
+        TABLE_NAMES.METRICS,
+        searchQuery,
+        searchQuery,
+        { limit, skip }
+      );
 
-      return ApiResponse("success", parentMetrics);
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments(
+        searchQuery
+      );
+
+      return {
+        metrics: parentMetrics,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new Error("Error fetching parent metrics: " + error.message);
     }
@@ -98,28 +114,45 @@ module.exports.MetricService = {
   //     throw new Error("Error fetching child metrics: " + error.message);
   //   }
   // },
-  getChildMetricsByParentId: async (metricId) => {
+  getChildMetricsByParentId: async (metricId, q, { page, limit }) => {
     try {
       const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {
         _id: metricId,
       });
 
       if (!parentMetric) {
-        return null;
+        return {
+          parentMetric: null,
+          sub_metrics: [],
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: 1,
+        };
       }
-      const childMetrics = await getRecordsByKey(TABLE_NAMES.METRICS, {
+      const searchQuery = {
         parent_id: metricId,
-      });
-
-      if (!childMetrics) {
-        return null;
-      }
-      const result = {
-        ...parentMetric._doc,
-        sub_metrics: childMetrics,
       };
+      if (searchQuery) {
+        searchQuery["$or"] = [{ label: { $regex: q, $options: "i" } }];
+      }
+      const skip = (page - 1) * limit;
+      const childMetrics = await getRecordsByKey(
+        TABLE_NAMES.METRICS,
+        searchQuery,
+        { limit, skip }
+      );
 
-      return result;
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments(
+        searchQuery
+      );
+
+      return {
+        parentMetric: parentMetric._doc,
+        sub_metrics: childMetrics,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
     } catch (error) {
       throw new NotFoundError(error.message);
     }
