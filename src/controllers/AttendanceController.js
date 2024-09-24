@@ -94,12 +94,16 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
       if (is_admin) {
-        const { attendanceDate: date, page = 1, limit = 10 } = req.query;
+        const { attendanceDate: date, page = 1, limit = 10, q } = req.query;
 
-        const attendanceRecord = await AttendanceService.getAllRecords(date, {
-          page: parseInt(page),
-          limit: parseInt(limit),
-        });
+        const attendanceRecord = await AttendanceService.getAllRecords(
+          date,
+          q,
+          {
+            page: parseInt(page),
+            limit: parseInt(limit),
+          }
+        );
         res.json(ApiResponse("success", attendanceRecord || null));
       } else {
         res.status(403).json({ message: "Access denied" });

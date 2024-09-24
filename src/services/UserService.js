@@ -59,10 +59,14 @@ module.exports.UserService = {
         "desc"
       );
 
-      let newEmployeeId = 1;
+      let newEmployeeIdNumber = 1;
       if (latestUser && latestUser?.employeeId) {
-        newEmployeeId = latestUser.employeeId + 1;
+        const latestEmployeeId = parseInt(
+          latestUser.employeeId.replace("D2I_", "")
+        );
+        newEmployeeIdNumber = latestEmployeeId + 1;
       }
+      const newEmployeeId = `D2i_${newEmployeeIdNumber}`;
 
       //generate inviteCode
       const inviteCode = crypto.randomBytes(16).toString("hex");
@@ -119,9 +123,6 @@ module.exports.UserService = {
   searchUsers: async (query, currentUserId, { page, limit }) => {
     try {
       const skip = (page - 1) * limit;
-
-      const isNumericQuery = !isNaN(query);
-
       const searchQuery = {
         $and: [
           { _id: { $ne: currentUserId } }, // Exclude current user
@@ -130,15 +131,13 @@ module.exports.UserService = {
               { firstName: { $regex: query, $options: "i" } },
               { lastName: { $regex: query, $options: "i" } },
               { officialEmail: { $regex: query, $options: "i" } },
-              // { employeeId: { $regex: query, $options: "i" } },
+              { employeeId: { $regex: query, $options: "i" } },
               { alternateEmail: { $regex: query, $options: "i" } },
               { role: { $regex: query, $options: "i" } },
               { bloodGroup: { $regex: query, $options: "i" } },
               { birthday: { $regex: query, $options: "i" } },
               { contactNumber: { $regex: query, $options: "i" } },
               { alternateContactNumber: { $regex: query, $options: "i" } },
-
-              ...(isNumericQuery ? [{ employeeId: query }] : []),
             ],
           },
         ],

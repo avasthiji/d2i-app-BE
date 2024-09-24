@@ -1,3 +1,4 @@
+const { options } = require("joi");
 const { NotFoundError } = require("../exceptions");
 const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
@@ -66,20 +67,25 @@ module.exports.MetricService = {
     }
   },
   // Fetch all parent metrics (i.e., metrics with parent_id == null)
-  getParentMetrics: async ({ page, limit }) => {
+  getParentMetrics: async (q, { page, limit }) => {
     try {
       const skip = (page - 1) * limit;
+      const searchQuery = {
+        parent_id: null,
+      };
+      if (q) {
+        searchQuery["$or"] = [{ label: { $regex: q, $options: "i" } }];
+      }
       const parentMetrics = await getRecordsByKey(
         TABLE_NAMES.METRICS,
-        {
-          parent_id: null,
-        },
+        searchQuery,
+        searchQuery,
         { limit, skip }
       );
 
-      const totalRecords = await TABLE_NAMES.METRICS.countDocuments({
-        parent_id: null,
-      });
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments(
+        searchQuery
+      );
 
       return {
         metrics: parentMetrics,
@@ -108,7 +114,7 @@ module.exports.MetricService = {
   //     throw new Error("Error fetching child metrics: " + error.message);
   //   }
   // },
-  getChildMetricsByParentId: async (metricId, { page, limit }) => {
+  getChildMetricsByParentId: async (metricId, q, { page, limit }) => {
     try {
       const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {
         _id: metricId,
@@ -123,18 +129,22 @@ module.exports.MetricService = {
           currentPage: 1,
         };
       }
+      const searchQuery = {
+        parent_id: metricId,
+      };
+      if (searchQuery) {
+        searchQuery["$or"] = [{ label: { $regex: q, $options: "i" } }];
+      }
       const skip = (page - 1) * limit;
       const childMetrics = await getRecordsByKey(
         TABLE_NAMES.METRICS,
-        {
-          parent_id: metricId,
-        },
+        searchQuery,
         { limit, skip }
       );
 
-      const totalRecords = await TABLE_NAMES.METRICS.countDocuments({
-        parent_id: metricId,
-      });
+      const totalRecords = await TABLE_NAMES.METRICS.countDocuments(
+        searchQuery
+      );
 
       return {
         parentMetric: parentMetric._doc,

@@ -4,8 +4,8 @@ const { ApiResponse } = require("../utils/ApiHelper");
 module.exports = {
   index: async (req, res, next) => {
     try {
-      const { page = 1, limit = 10 } = req.query;
-      const data = await MetricService.getParentMetrics({
+      const { page = 1, limit = 10, q } = req.query;
+      const data = await MetricService.getParentMetrics(q, {
         page: parseInt(page),
         limit: parseInt(limit),
       });
@@ -18,9 +18,9 @@ module.exports = {
 
   show: async (req, res, next) => {
     try {
-      const { page = 1, limit = 10 } = req.query;
+      const { page = 1, limit = 10, q } = req.query;
       const parentId = req.params.metrics_id;
-      const data = await MetricService.getChildMetricsByParentId(parentId, {
+      const data = await MetricService.getChildMetricsByParentId(parentId, q, {
         page: parseInt(page),
         limit: parseInt(limit),
       });

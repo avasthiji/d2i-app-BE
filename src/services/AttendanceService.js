@@ -91,9 +91,18 @@ module.exports.AttendanceService = {
     }
   },
 
-  getAllRecords: async (date, { page, limit }) => {
+  getAllRecords: async (date, q, { page, limit }) => {
     try {
       const skips = (page - 1) * limit;
+      const searchQuery = {};
+      if (q) {
+        searchQuery["$or"] = [
+          { "userDetails.firstName": { $regex: q, $options: "i" } },
+          { "userDetails.lastName": { $regex: q, $options: "i" } },
+          { "userDetails.officialEmail": { $regex: q, $options: "i" } },
+          { "employees.timesheet": { $regex: q, $options: "i" } },
+        ];
+      }
       const attendanceRecords = await Attendance.aggregate([
         {
           $match: { attendanceDate: new Date(date) },
@@ -112,6 +121,7 @@ module.exports.AttendanceService = {
         {
           $unwind: "$userDetails",
         },
+        { $match: searchQuery },
         {
           $addFields: {
             "employees.userName": {
