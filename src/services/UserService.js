@@ -62,11 +62,11 @@ module.exports.UserService = {
       let newEmployeeIdNumber = 1;
       if (latestUser && latestUser?.employeeId) {
         const latestEmployeeId = parseInt(
-          latestUser.employeeId.replace("D2I_", "")
+          latestUser.employeeId.replace("d2i_", "")
         );
         newEmployeeIdNumber = latestEmployeeId + 1;
       }
-      const newEmployeeId = `D2i_${newEmployeeIdNumber}`;
+      const newEmployeeId = `d2i_${newEmployeeIdNumber}`;
 
       //generate inviteCode
       const inviteCode = crypto.randomBytes(16).toString("hex");
