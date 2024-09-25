@@ -23,6 +23,7 @@ const upload = require("../middlewares/MulterMiddleware");
 const ResetPasswordController = require("../controllers/ResetPasswordController");
 const AdminController = require("../controllers/AdminController");
 const LeaveController = require("../controllers/LeaveController");
+const NotificationsController = require("../controllers/NotificationsController");
 
 //authMiddleware
 
@@ -79,6 +80,8 @@ RouteHelper.resource(
   AuthMiddleware.verify()
 );
 
-RouteHelper.resource(router,"leave",LeaveController,AuthMiddleware.verify());
+RouteHelper.resource(router, "leave", LeaveController, AuthMiddleware.verify());
+
+RouteHelper.resource(router, "sendNotification", NotificationsController);
 
 module.exports.router = router;
