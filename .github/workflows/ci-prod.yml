@@ -1,0 +1,26 @@
+name: Deploy On Prod
+on:
+  push:
+    branches:
+      - prod
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+    
+      - name: Create Build
+        run: |
+            npm install
+            zip -r d2ibe.zip ./*
+
+      - name: Deploy via Http Deploy Service
+        run: |
+            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'args=/var/www/html/d2ibe' ${{secrets.DEPLOY_HOST}}/rmdir
+            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'file=@d2ibe.zip' -F 'args=/var/www/html/d2ibe' ${{secrets.DEPLOY_HOST}}/csync
+            curl -H 'X-TOKEN:${{ secrets.TOKEN }}' -X POST -F 'args=restart|d2inodeservice.service' ${{secrets.DEPLOY_HOST}}/systemctl
+
