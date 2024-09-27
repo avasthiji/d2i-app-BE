@@ -1,12 +1,8 @@
 const axios = require("axios");
 
-// Replace these with your actual OneSignal App ID and REST API Key
-const ONE_SIGNAL_APP_ID = "61699a51-2649-4711-9dec-330d06a7d771";
-const ONE_SIGNAL_API_KEY = "Y2VmMzlmNTUtZDA1NC00YTc5LWIwMjAtNzk0NzUyZGFhY2Iz";
-
 async function sendNotification(heading, content, segmentName = "All") {
   const notificationData = {
-    app_id: ONE_SIGNAL_APP_ID,
+    app_id: process.env.ONE_SIGNAL_APP_ID,
     headings: { en: heading },
     contents: { en: content },
     included_segments: [segmentName],
@@ -19,7 +15,7 @@ async function sendNotification(heading, content, segmentName = "All") {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Basic ${ONE_SIGNAL_API_KEY}`,
+          Authorization: `Basic ${process.env.ONE_SIGNAL_API_KEY}`,
         },
       }
     );

@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const app = express();
 const path = require("path");
+require("./utils/CronJobber");
 const {
   UnauthorizedError,
   ValidationError,
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/api/uploads", express.static(process.env.UPLOAD_DIR));
 app.use("/api/v1", router);
 
 // catch 404 and forward to error handler

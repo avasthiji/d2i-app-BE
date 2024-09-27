@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Ensure uploads directory exists
-const uploadDir = path.resolve(__dirname, "../../public/api/uploads");
+const uploadDir = path.resolve(process.env.UPLOAD_DIR);
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

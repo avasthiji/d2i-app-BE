@@ -82,6 +82,11 @@ RouteHelper.resource(
 
 RouteHelper.resource(router, "leave", LeaveController, AuthMiddleware.verify());
 
-RouteHelper.resource(router, "sendNotification", NotificationsController);
+RouteHelper.resource(
+  router,
+  "sendNotification",
+  NotificationsController,
+  AuthMiddleware.verify()
+);
 
 module.exports.router = router;
