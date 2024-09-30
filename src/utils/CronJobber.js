@@ -39,7 +39,7 @@ async function getTodayEvents() {
 
 async function sendDailyNotifications() {
   const events = await getTodayEvents();
-  console.log(events);
+  // console.log(events);
 
   let messageParts = [];
 
@@ -80,3 +80,29 @@ const job = new CronJob("0 9 * * *", async () => {
 
 job.start();
 // console.log('Cron job started');
+
+async function getTodayHoliday() {
+  const today = moment().format("MM-DD");
+  const holidays = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+    $expr: {
+      $eq: [{ $substr: ["$date", 5, 5] }, today],
+    },
+  });
+
+  return holidays;
+}
+
+async function CheckHolidayNotifications() {
+  const holidays = await getTodayHoliday();
+  if (holidays.length > 0) {
+    const holidayNames = holidays.map((holiday) => holiday.name).join(",");
+    const message = `🎉 Holiday today: ${holidayNames}`;
+    await sendNotification("Holiday Alert", message, "All");
+  }
+}
+
+const HolidayJob = new CronJob("0 8 * * *", async () => {
+  await CheckHolidayNotifications();
+});
+HolidayJob.start();
+// console.log('holiday job started');

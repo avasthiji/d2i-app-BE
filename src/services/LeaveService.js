@@ -140,9 +140,9 @@ module.exports.LeaveService = {
       const { userId, leaveStart, leaveEnd, leaveType, dayType, reason } =
         leaveData;
 
-      const startDate = new Date(leaveStart);
-      const endDate = new Date(leaveEnd);
-      const currentDate = new Date();
+      const startDate = new Date(leaveStart).toISOString().split("T")[0];
+      const endDate = new Date(leaveEnd).toISOString().split("T")[0];
+      const currentDate = new Date().toISOString().split("T")[0];
 
       if (startDate < currentDate) {
         throw new ValidationError("Leave start date cannot be in the past.");
