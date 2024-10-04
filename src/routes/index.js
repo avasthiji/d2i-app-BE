@@ -85,7 +85,7 @@ RouteHelper.resource(router, "leave", LeaveController, AuthMiddleware.verify());
 
 RouteHelper.resource(
   router,
-  "sendNotification",
+  "notification",
   NotificationsController,
   AuthMiddleware.verify()
 );
