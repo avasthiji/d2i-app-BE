@@ -1,7 +1,7 @@
-const { json } = require("express");
 const { NotFoundError, BadRequestError } = require("../exceptions");
 const Attendance = require("../models/Attendance");
 const { TABLE_NAMES } = require("../utils/db");
+const transporter = require("../utils/Mailer");
 const { getRecordByKey, insertRecord } = require("../utils/QueryBuilder");
 
 module.exports.AttendanceService = {
@@ -76,8 +76,30 @@ module.exports.AttendanceService = {
         (employeeRecord.punchOutTime - employeeRecord.punchInTime) / (1000 * 60)
       );
       employeeRecord.workingDuration = workingDuration;
+
+      //Fetrch user and its manager
+      const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: user_id });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const manager = await getRecordByKey(TABLE_NAMES.USERS, {
+        _id: user.parent_id,
+      });
+      if (!manager) {
+        throw new Error("Manager not found");
+      }
+
       if (timesheet) {
-        employeeRecord.timesheet = timesheet;
+        const emailOptions = {
+          from: user.officialEmail,
+          to: manager.officialEmail,
+          subject: "Employee Timesheet",
+          html: `<p>Hello ${manager.firstName},</p>
+               <p>${user.firstName} has submitted their timesheet for today's attendance:</p>
+               <p>${timesheet}</p>
+               <p>Working duration: ${workingDuration} minutes</p>`,
+        };
+        await transporter.sendMail(emailOptions);
       }
 
       await attendance.save();

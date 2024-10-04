@@ -10,7 +10,6 @@ const employeeAttendanceSchema = mongoose.Schema(
     punchInTime: { type: Date, default: null },
     punchOutTime: { type: Date, default: null },
     workingDuration: { type: Number, default: 0 },
-    timesheet: { type: String, default:null },
     isOnLeave: { type: Boolean, default: true },
   },
   { _id: false }
