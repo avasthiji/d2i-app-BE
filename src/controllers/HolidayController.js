@@ -38,6 +38,28 @@ module.exports = {
     }
   },
 
+  show: async (req, res, next) => {
+    try {
+      const { is_admin } = req.auth;
+
+      if (is_admin) {
+        const { holiday_id } = req.params;
+        const holiday = await HolidayService.getHolidayById(holiday_id);
+
+        if (holiday) {
+          res.status(200).json(ApiResponse("success", holiday));
+        } else {
+          res.status(404).json({ message: "Holiday not found" });
+        }
+      } else {
+        res.status(403).json({ message: "Access denied" });
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
   update: async (req, res, next) => {
     try {
       const { is_admin } = req.auth;

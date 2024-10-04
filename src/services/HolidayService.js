@@ -1,3 +1,4 @@
+const { BadRequestError } = require("../exceptions");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
 const {
@@ -49,6 +50,21 @@ module.exports.HolidayService = {
       };
     } catch (error) {
       throw new Error("Error Fetching holidays:" + error.message);
+    }
+  },
+
+  getHolidayById: async (holiday_id) => {
+    try {
+      const data = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+        _id: holiday_id,
+      });
+
+      if (!(data.length > 0)) {
+        throw new Error("Error fetching holiday!!");
+      }
+      return data;
+    } catch (error) {
+      throw new BadRequestError(error.message);
     }
   },
   updateHoliday: async (id, { name, date }) => {
