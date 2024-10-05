@@ -45,7 +45,6 @@ module.exports = {
       const data = await HolidayService.getHolidayByID(holidayId);
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
