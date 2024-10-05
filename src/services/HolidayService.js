@@ -8,16 +8,16 @@ const {
 } = require("../utils/QueryBuilder");
 
 module.exports.HolidayService = {
-  createHoliday: async (name, date) => {
+  createHoliday: async (year, holidays) => {
     try {
-      const holiday = await insertRecord(TABLE_NAMES.HOLIDAY, {
-        name: name,
-        date: date,
+      const holidayRecord = await insertRecord(TABLE_NAMES.HOLIDAY, {
+        year: year,
+        holidays: holidays,
       });
-      if (!holiday) {
-        throw new Error("Error creating holiday!!");
+      if (!holidayRecord) {
+        throw new Error("Error creating holiday record!!");
       }
-      return ApiResponse("success", holiday);
+      return ApiResponse("success", holidayRecord);
     } catch (error) {
       throw new Error("Error creating holiday:" + error.message);
     }
@@ -28,9 +28,16 @@ module.exports.HolidayService = {
       const searchQuery = {};
 
       if (q) {
-        searchQuery["$or"] = [{ name: { $regex: q, $options: "i" } }];
+        const year =Number(q);
+        if(!isNaN(year)){
+          searchQuery["$or"] = [
+            {year:year},
+            { "holidays.name": { $regex: q, $options: "i" } },
+          ];
+        }else{
+          searchQuery["holidays.name"] = { $regex: q, $options: "i" };
+        }
       }
-
       const records = await getRecordsByKey(TABLE_NAMES.HOLIDAY, searchQuery, {
         limit,
         skip,
@@ -43,7 +50,7 @@ module.exports.HolidayService = {
       );
 
       return {
-        holidays: records,
+        records,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
         currentPage: page,
@@ -53,36 +60,46 @@ module.exports.HolidayService = {
     }
   },
 
-  getHolidayById: async (holiday_id) => {
-    try {
-      const data = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
-        _id: holiday_id,
-      });
+  // getHolidayById: async (holiday_id) => {
+  //   try {
+  //     const data = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+  //       _id: holiday_id,
+  //     });
 
-      if (!(data.length > 0)) {
-        throw new Error("Error fetching holiday!!");
-      }
-      return data;
+  //     if (!(data.length > 0)) {
+  //       throw new Error("Error fetching holiday!!");
+  //     }
+  //     return data;
+  //   } catch (error) {
+  //     throw new BadRequestError(error.message);
+  //   }
+  // },
+  // Get holidays by year (new method to check if holidays exist for a specific year)
+  getHolidaysByYear: async (year) => {
+    try {
+      const holidayRecord = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+        year,
+      });
+      return holidayRecord.length > 0 ? holidayRecord[0] : null;
     } catch (error) {
-      throw new BadRequestError(error.message);
+      throw new Error("Error fetching holidays for year: " + error.message);
     }
   },
-  updateHoliday: async (id, { name, date }) => {
+  updateHoliday: async (year, holidays) => {
     try {
-      const updatedHoliday = await updateRecordsByKey(
+      const updatedRecord = await updateRecordsByKey(
         TABLE_NAMES.HOLIDAY,
-        { _id: id },
-        { name, date }
+        { year },
+        { holidays }
       );
 
-      if (!updatedHoliday) {
-        throw new Error("Error updating holiday!!");
+      if (!updatedRecord) {
+        throw new Error("Holidays for the year not found");
       }
 
       return {
-        name: updatedHoliday.name,
-        date: updatedHoliday.date,
-        _id: updatedHoliday._id,
+        year: updatedRecord.year,
+        holidays: updatedRecord.holidays,
       };
     } catch (error) {
       throw new Error("Error updating Holiday:" + error.message);
