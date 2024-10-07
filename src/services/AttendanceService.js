@@ -82,23 +82,25 @@ module.exports.AttendanceService = {
       if (!user) {
         throw new Error("User not found");
       }
-      const manager = await getRecordByKey(TABLE_NAMES.USERS, {
-        _id: user.parent_id,
-      });
-      if (!manager) {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
-      }
-      if (timesheet) {
-        const emailOptions = {
-          from: user.officialEmail,
-          to: manager.officialEmail,
-          subject: "Employee Timesheet",
-          html: `<p>Hello ${manager.firstName},</p>
-                 <p>${user.firstName} has submitted their timesheet for today's attendance:</p>
-                 <p>${timesheet}</p>
-                 <p>Working duration: ${workingDuration} minutes</p>`,
-        };
-        await transporter.sendMail(emailOptions);
+      if (user.role !== "ADMIN") {
+        const manager = await getRecordByKey(TABLE_NAMES.USERS, {
+          _id: user.parent_id,
+        });
+        if (!manager) {
+          throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
+        }
+        if (timesheet) {
+          const emailOptions = {
+            from: user.officialEmail,
+            to: manager.officialEmail,
+            subject: "Employee Timesheet",
+            html: `<p>Hello ${manager.firstName},</p>
+            <p>${user.firstName} has submitted their timesheet for today's attendance:</p>
+            <p>${timesheet}</p>
+            <p>Working duration: ${workingDuration} minutes</p>`,
+          };
+          await transporter.sendMail(emailOptions);
+        }
       }
 
       await attendance.save();
