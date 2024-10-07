@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { AttendanceService } = require("../services/AttendanceService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
@@ -9,7 +10,7 @@ module.exports = {
       if (!action) {
         return res
           .status(400)
-          .json({ message: "Action is required(punchIn or punchOut)" });
+          .json({ message: CONSTANTS.ERROR_MESSAGES.PUNCH_ACTION_REQUIRED });
       }
       if (attendanceDate) {
         attendanceDate = new Date(attendanceDate);
@@ -38,7 +39,7 @@ module.exports = {
       } else if (action === "punchOut") {
         attendance = await AttendanceService.punchOut(date, user_id, timesheet);
       } else {
-        return res.status(400).json({ message: "Invalid Action specified." });
+        return res.status(400).json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
       }
       res.json(ApiResponse("success", attendance));
     } catch (error) {
@@ -52,39 +53,38 @@ module.exports = {
 
       const loggedInuserId = req.auth.userId;
 
-      if (userId !== loggedInuserId) {
-        return res
+      if (userId === loggedInuserId) {
+         let { attendanceDate: date } = req.query;
+         if (date) {
+           date = new Date(
+             Date.UTC(
+               new Date(date).getFullYear(),
+               new Date(date).getMonth(),
+               new Date(date).getDate()
+             )
+           );
+         } else {
+           date = new Date(
+             Date.UTC(
+               new Date().getFullYear(),
+               new Date().getMonth(),
+               new Date().getDate()
+             )
+           );
+         }
+
+         const attendanceDetails =
+           await AttendanceService.getMyAttendanceDetails(date, loggedInuserId);
+
+         res.json(ApiResponse("success", attendanceDetails || null));
+
+      }else{
+         res
           .status(403)
-          .json(
-            ApiResponse("error", "You are not authorized to access this data.")
-          );
+          .json(ApiResponse("error", CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED));
       }
 
-      let { attendanceDate: date } = req.query;
-      if (date) {
-        date = new Date(
-          Date.UTC(
-            new Date(date).getFullYear(),
-            new Date(date).getMonth(),
-            new Date(date).getDate()
-          )
-        );
-      } else {
-        date = new Date(
-          Date.UTC(
-            new Date().getFullYear(),
-            new Date().getMonth(),
-            new Date().getDate()
-          )
-        );
-      }
-
-      const attendanceDetails = await AttendanceService.getMyAttendanceDetails(
-        date,
-        loggedInuserId
-      );
-
-      res.json(ApiResponse("success", attendanceDetails || null));
+     
     } catch (error) {
       next(error);
     }
@@ -106,7 +106,7 @@ module.exports = {
         );
         res.json(ApiResponse("success", attendanceRecord || null));
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res.status(403).json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       next(error);

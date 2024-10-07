@@ -66,7 +66,7 @@ module.exports.LeaveService = {
           status !== "rejected" &&
           status !== "pending"
         ) {
-          throw new Error("Invalid status, Try sending valid one.");
+          throw new Error(CONSTANTS.ERROR_MESSAGES.INVALID_ACTION);
         }
         match.status = status;
       }
@@ -145,13 +145,11 @@ module.exports.LeaveService = {
       const currentDate = new Date().toISOString().split("T")[0];
 
       if (startDate < currentDate) {
-        throw new ValidationError("Leave start date cannot be in the past.");
+        throw new ValidationError(CONSTANTS.ERROR_MESSAGES.LEAVE_START_DATE);
       }
 
       if (endDate < startDate) {
-        throw new ValidationError(
-          "Leave end date cannot be before leave start date."
-        );
+        throw new ValidationError(CONSTANTS.ERROR_MESSAGES.LEAVE_END_DATE);
       }
 
       const overlappingLeave = await getRecordByKey(TABLE_NAMES.LEAVE, {
@@ -164,17 +162,17 @@ module.exports.LeaveService = {
 
       if (overlappingLeave) {
         throw new ValidationError(
-          "You already have a leave request for these dates."
+          CONSTANTS.ERROR_MESSAGES.ALREADY_LEAVE_REQUEST
         );
       }
 
       const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
-      if (!user) throw new Error("User not found");
+      if (!user) throw new Error(CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND);
 
       const manager = await getRecordByKey(TABLE_NAMES.USERS, {
         _id: user.parent_id,
       });
-      if (!manager) throw new Error("Manager not found");
+      if (!manager) throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
 
       const newLeave = await insertRecord(TABLE_NAMES.LEAVE, {
         userId,
@@ -187,7 +185,7 @@ module.exports.LeaveService = {
         status: "pending",
       });
 
-      const applyLeaveLink = `${CONSTANTS.LEAVE_URL}`;
+      const applyLeaveLink = `${CONSTANTS.URL.LEAVE_URL}`;
       const mailOptions = {
         from: user.officialEmail,
         to: manager.officialEmail,
@@ -211,14 +209,14 @@ module.exports.LeaveService = {
   approveLeave: async (leaveId, managerId, is_admin) => {
     try {
       const leave = await getRecordByKey(TABLE_NAMES.LEAVE, { _id: leaveId });
-      if (!leave) throw new Error("Leave not found");
+      if (!leave) throw new Error(CONSTANTS.ERROR_MESSAGES.LEAVE_NOT_FOUND);
 
       if (!is_admin && leave.managerId.toString() !== managerId) {
-        throw new Error("You are not authorized to approve this leave.");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED);
       }
 
       if (leave.status !== "pending") {
-        throw new Error("Leave has already been processed.");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.LEAVE_ALREADY_PROCESSED);
       }
 
       const updatedLeave = await updateRecordsByKey(
@@ -233,7 +231,7 @@ module.exports.LeaveService = {
       const manager = await getRecordByKey(TABLE_NAMES.USERS, {
         _id: managerId,
       });
-      const approveLeaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
+      const approveLeaveLink = `${CONSTANTS.URL.LEAVE_URL}/${user._id}`;
       const mailOptions = {
         from: manager.officialEmail,
         to: user.officialEmail,
@@ -253,14 +251,14 @@ module.exports.LeaveService = {
   rejectLeave: async (leaveId, managerId, is_admin) => {
     try {
       const leave = await getRecordByKey(TABLE_NAMES.LEAVE, { _id: leaveId });
-      if (!leave) throw new Error("Leave not found");
+      if (!leave) throw new Error(CONSTANTS.ERROR_MESSAGES.LEAVE_NOT_FOUND);
 
       if (!is_admin && leave.managerId.toString() !== managerId) {
-        throw new Error("You are not authorized to reject this leave.");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED);
       }
 
       if (leave.status !== "pending") {
-        throw new Error("Leave has already been processed.");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.LEAVE_ALREADY_PROCESSED);
       }
 
       const updatedLeave = await updateRecordsByKey(
@@ -276,7 +274,7 @@ module.exports.LeaveService = {
         _id: managerId,
       });
 
-      const leaveLink = `${CONSTANTS.LEAVE_URL}/${user._id}`;
+      const leaveLink = `${CONSTANTS.URL.LEAVE_URL}/${user._id}`;
       const mailOptions = {
         from: manager.officialEmail,
         to: user.officialEmail,

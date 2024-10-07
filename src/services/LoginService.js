@@ -5,16 +5,18 @@ const { ApiResponse } = require("../utils/ApiHelper");
 const { AccessDeniedError, ValidationError } = require("../exceptions");
 const { TABLE_NAMES } = require("../utils/db");
 const { getRecordByKey } = require("../utils/QueryBuilder");
+const CONSTANTS = require("../constants");
 
 module.exports.LoginService = {
   loginUser: async (officialEmail, password) => {
     try {
       // Check if user exists
       const user = await getRecordByKey(TABLE_NAMES.USERS, { officialEmail });
-      if (!user) throw new Error("User not found");
+      if (!user) throw new Error(CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND);
       //check if passowrd matches
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) throw new Error("Invalid credentials");
+      if (!isMatch)
+        throw new Error(CONSTANTS.ERROR_MESSAGES.INVALID_CREDENTIALS);
 
       // Generate a token
       const authToken = AuthService.createToken(user.id, user.role);
@@ -25,11 +27,6 @@ module.exports.LoginService = {
         firstName: user.firstName,
         lastName: user.lastName,
         officialEmail: user.officialEmail,
-        // alternateEmail: user.alternateEmail,
-        // contactNumber: user.contactNumber,
-        // alternateContactNumber: user.alternateContactNumber,
-        // birthday: user.birthday,
-        // bloodGroup: user.bloodGroup,
         role: user.role,
       });
     } catch (error) {

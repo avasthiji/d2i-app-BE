@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { HolidayService } = require("../services/HolidayService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
@@ -8,23 +9,23 @@ module.exports = {
       const { year, holidays } = req.body;
 
       if (!is_admin) {
-        return res.status(403).json({ message: "Access denied" });
+        return res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
       if (!year || !holidays || !holidays.length) {
         return res
           .status(400)
-          .json({ message: "Year and Holidays are required fields" });
+          .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_REQUIRED_FIELDS });
       }
 
       // Check if holidays for this year already exist
       const existingHolidays = await HolidayService.getHolidaysByYear(year);
-      
+
       if (existingHolidays) {
-        return res
-          .status(400)
-          .json({
-            message: `Holidays for the year ${year} already exist. Please use update method.`,
-          });
+        return res.status(400).json({
+          message: `Holidays for the year ${year} already exist. Please use update method.`,
+        });
       }
 
       const record = await HolidayService.createHoliday(year, holidays);
@@ -48,7 +49,7 @@ module.exports = {
       next(error);
     }
   },
-//currently might be not needing it then will be removed
+  //currently might be not needing it then will be removed
   // show: async (req, res, next) => {
   //   try {
   //     const { is_admin } = req.auth;
@@ -75,30 +76,35 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
 
-      const { holiday_id:year } = req.params;
-      
+      const { holiday_id: year } = req.params;
+
       const { holidays } = req.body;
 
       if (is_admin) {
-        if (!holidays || !holidays.length) {
-          return res
+        if (holidays || holidays?.length) {
+          // Check if holidays for this year exist
+          const existingHolidays = await HolidayService.getHolidaysByYear(year);
+          if (existingHolidays) {
+            const updatedRecord = await HolidayService.updateHoliday(
+              year,
+              holidays
+            );
+
+            return res.status(200).json(ApiResponse("success", updatedRecord));
+          } else {
+            res
+              .status(404)
+              .json({ message: `No holidays found for the year ${year}` });
+          }
+        } else {
+          res
             .status(400)
-            .json({ message: "Holidays array is required" });
+            .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_ARRAY_FIELDS });
         }
-
-        // Check if holidays for this year exist
-        const existingHolidays = await HolidayService.getHolidaysByYear(year);
-        if (!existingHolidays) {
-          return res
-            .status(404)
-            .json({ message: `No holidays found for the year ${year}` });
-        }
-
-        const updatedRecord = await HolidayService.updateHoliday(year, holidays);
-
-        res.status(200).json(ApiResponse("success", updatedRecord));
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       console.log(error);

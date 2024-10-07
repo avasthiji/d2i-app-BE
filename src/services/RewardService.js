@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { NotFoundError, ValidationError } = require("../exceptions");
-const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
 const {
@@ -11,6 +10,7 @@ const {
 } = require("../utils/QueryBuilder");
 const User = require("../models/User");
 const Reward = require("../models/Reward");
+const CONSTANTS = require("../constants");
 
 module.exports.RewardService = {
   assignReward: async (user_id, metric_id, points, comment, submittedBy) => {
@@ -20,11 +20,11 @@ module.exports.RewardService = {
         _id: metric_id,
       });
       if (!metric) {
-        throw new Error("Metric not found");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.METRIC_NOT_FOUND);
       }
 
       if (points < -metric.maximum_points || points > metric.maximum_points) {
-        throw new Error("Points out of allowed range");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.POINTS_OUT_RANGE);
       }
 
       //creating reward

@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { BadRequestError } = require("../exceptions");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
@@ -15,7 +16,7 @@ module.exports.HolidayService = {
         holidays: holidays,
       });
       if (!holidayRecord) {
-        throw new Error("Error creating holiday record!!");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.HOLIDAY_CREATING_ERROR);
       }
       return ApiResponse("success", holidayRecord);
     } catch (error) {
@@ -28,13 +29,13 @@ module.exports.HolidayService = {
       const searchQuery = {};
 
       if (q) {
-        const year =Number(q);
-        if(!isNaN(year)){
+        const year = Number(q);
+        if (!isNaN(year)) {
           searchQuery["$or"] = [
-            {year:year},
+            { year: year },
             { "holidays.name": { $regex: q, $options: "i" } },
           ];
-        }else{
+        } else {
           searchQuery["holidays.name"] = { $regex: q, $options: "i" };
         }
       }
@@ -94,7 +95,7 @@ module.exports.HolidayService = {
       );
 
       if (!updatedRecord) {
-        throw new Error("Holidays for the year not found");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.NO_HOLIDAYS_FOR_YEAR);
       }
 
       return {

@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
-const { NotFoundError, ValidationError } = require("../exceptions");
+const { ValidationError } = require("../exceptions");
 const User = require("../models/User");
 const { ApiResponse } = require("../utils/ApiHelper");
-const { TABLE_NAMES } = require("../utils/db");
-const { getRecordsByKey } = require("../utils/QueryBuilder");
 
 module.exports.SubordinateService = {
   getAllSubordinates: async (userId) => {

@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { MetricService } = require("../services/MetricService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
@@ -45,7 +46,9 @@ module.exports = {
         const newMetric = await MetricService.createMetric(metricData);
         res.status(201).json(newMetric);
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       console.log(error);
@@ -63,7 +66,9 @@ module.exports = {
       );
 
       if (!updatedMetric) {
-        return res.status(400).json({ message: "Metric not found" });
+        return res
+          .status(400)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.METRIC_NOT_FOUND });
       }
       res.status(200).json(ApiResponse("success", updatedMetric));
     } catch (error) {
@@ -79,9 +84,13 @@ module.exports = {
       const deletedMetric = await MetricService.deleteMetric(metricId);
 
       if (!deletedMetric) {
-        return res.status(404).json({ message: "Metric not found" });
+        return res
+          .status(404)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.METRIC_NOT_FOUND });
       }
-      res.status(200).json({ message: "Metric deleted successfully" });
+      res
+        .status(200)
+        .json({ message: CONSTANTS.ERROR_MESSAGES.METRIC_DELETED });
     } catch (error) {
       console.log(error);
       next(error);

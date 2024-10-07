@@ -10,6 +10,7 @@ const {
   deleteRecordsById,
   getLatestRecordByKey,
 } = require("../utils/QueryBuilder");
+const CONSTANTS = require("../constants");
 
 module.exports.UserService = {
   getAllUsers: async (currentUserId, includeSelf, { page, limit }) => {
@@ -43,7 +44,7 @@ module.exports.UserService = {
       const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: userId });
 
       if (!user) {
-        throw new Error("User not Found");
+        throw new Error(CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND);
       }
       return user;
     } catch (error) {

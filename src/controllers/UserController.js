@@ -61,7 +61,7 @@ module.exports = {
         } else {
           const newUser = await UserService.createUser(userData);
 
-          const inviteLink = `${CONSTANTS.INVITE_URL}${newUser.inviteCode}`;
+          const inviteLink = `${CONSTANTS.URL.INVITE_URL}${newUser.inviteCode}`;
 
           const mailOptions = {
             from: process.env.EMAIL_FROM,
@@ -78,13 +78,15 @@ module.exports = {
           res.status(201).json(newUser);
         }
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       if (error.code === 11000) {
         return res
           .status(400)
-          .json({ message: "A user with this email already exists." });
+          .json({ message: CONSTANTS.ERROR_MESSAGES.USER_ALREADY_EXISTS });
       }
       console.log(error);
       next(error);
@@ -101,7 +103,9 @@ module.exports = {
       const existingUser = await UserService.getUserByID(userId);
 
       if (!existingUser) {
-        return res.status(404).json({ message: "User not found" });
+        return res
+          .status(404)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
       }
 
       //if file was uploaded, add it to file path of updated data
@@ -122,11 +126,15 @@ module.exports = {
       if (is_admin) {
         const updatedUser = await UserService.updateUser(userId, updateData);
         if (!updatedUser) {
-          res.status(404).json({ message: "User not found" });
+          res
+            .status(404)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
         }
         res.status(200).json(updatedUser);
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       console.log(error);
@@ -141,14 +149,19 @@ module.exports = {
 
       const { is_admin } = req.auth;
       if (is_admin) {
-        // const deletedUser = await UserService.deleteUser(userId);
         const deletedUser = await UserService.softDeleteUser(userId);
         if (!deletedUser) {
-          res.status(404).josn({ message: "User not found" });
+          res
+            .status(404)
+            .josn({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
         }
-        res.status(200).json({ message: "User deleted successfully" });
+        res
+          .status(200)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.USER_DELETED });
       } else {
-        res.status(403).json({ message: "Access denied" });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       console.log(error);

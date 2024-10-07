@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { LeaveService } = require("../services/LeaveService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
@@ -58,14 +59,13 @@ module.exports = {
         !leaveData.reason
       ) {
         return res.status(400).json({
-          message:
-            "All fields are required: leaveStart, leaveEnd, leaveType, dayType, reason",
+          message: CONSTANTS.ERROR_MESSAGES.LEAVE_FIELDS_REQUIRED,
         });
       }
 
       if (![0.5, 1].includes(leaveData.dayType)) {
         return res.status(400).json({
-          message: "dayType must be either 0.5 (half day) or 1 (full day)",
+          message: CONSTANTS.ERROR_MESSAGES.LEAVE_DAY_TYPE_ERROR,
         });
       }
 
@@ -103,7 +103,9 @@ module.exports = {
           is_admin
         );
       } else {
-        return res.status(400).json({ message: "Invalid status provided" });
+        return res
+          .status(400)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
       }
       res.status(200).json(ApiResponse("success", updatedLeave));
     } catch (error) {
