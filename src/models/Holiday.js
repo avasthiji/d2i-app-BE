@@ -6,6 +6,10 @@ const holdiaySchema = new mongoose.Schema({
     {
       name: { type: String, required: true },
       date: { type: Date, required: true },
+      is_optional: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
 });

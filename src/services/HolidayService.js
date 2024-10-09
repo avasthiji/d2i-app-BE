@@ -60,21 +60,27 @@ module.exports.HolidayService = {
       throw new Error("Error Fetching holidays:" + error.message);
     }
   },
+  getHolidayById: async (holiday_id) => {
+    try {
+      const holidayRecord = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+        "holidays._id": holiday_id,
+      });
+      if (!holidayRecord || holidayRecord.length === 0) {
+        return null;
+      }
+      const holiday = holidayRecord[0].holidays.find(
+        (holiday) => holiday._id.toString() === holiday_id
+      );
 
-  // getHolidayById: async (holiday_id) => {
-  //   try {
-  //     const data = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
-  //       _id: holiday_id,
-  //     });
+      if (!holiday) {
+        return null;
+      }
 
-  //     if (!(data.length > 0)) {
-  //       throw new Error("Error fetching holiday!!");
-  //     }
-  //     return data;
-  //   } catch (error) {
-  //     throw new BadRequestError(error.message);
-  //   }
-  // },
+      return holiday;
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
+  },
   // Get holidays by year (new method to check if holidays exist for a specific year)
   getHolidaysByYear: async (year) => {
     try {

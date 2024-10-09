@@ -13,6 +13,7 @@ const CONSTANTS = {
     ATTENDANCE_NOT_FOUND: "Employee attendance record not found.",
     ALREADY_PUNCHED_OUT: "User has already punched out.",
     MANAGER_NOT_FOUND: "Manager not found",
+    HOLIDAY_NOT_FOUND: "Holiday not found",
     USER_ALREADY_EXISTS: "A user with this email already exists.",
     ATTENDNACE_ALREADY_EXISTS:
       "Attendance record already exists for this user on this date.",

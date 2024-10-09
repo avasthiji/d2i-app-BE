@@ -49,29 +49,33 @@ module.exports = {
       next(error);
     }
   },
-  //currently might be not needing it then will be removed
-  // show: async (req, res, next) => {
-  //   try {
-  //     const { is_admin } = req.auth;
 
-  //     if (is_admin) {
-  //       const { holiday_id } = req.params;
-  //       const holiday = await HolidayService.getHolidayById(holiday_id);
+  show: async (req, res, next) => {
+    try {
+      const { is_admin } = req.auth;
 
-  //       if (holiday) {
-  //         res.status(200).json(ApiResponse("success", holiday));
-  //       } else {
-  //         res.status(404).json({ message: "Holiday not found" });
-  //       }
-  //     } else {
-  //       res.status(403).json({ message: "Access denied" });
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     next(error);
-  //   }
-  // },
+      if (is_admin) {
+        const { holiday_id } = req.params;
 
+        const holiday = await HolidayService.getHolidayById(holiday_id);
+
+        if (holiday) {
+          res.status(200).json(ApiResponse("success", holiday));
+        } else {
+          res
+            .status(404)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_NOT_FOUND });
+        }
+      } else {
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
   update: async (req, res, next) => {
     try {
       const { is_admin } = req.auth;
