@@ -1,3 +1,4 @@
+const moment = require("moment/moment");
 const CONSTANTS = require("../constants");
 const { HolidayService } = require("../services/HolidayService");
 const { ApiResponse } = require("../utils/ApiHelper");
@@ -19,6 +20,15 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_REQUIRED_FIELDS });
       }
 
+      // Validate each holiday date
+      for (const holiday of holidays) {
+        if (!moment(holiday.date, "YYYY-MM-DD", true).isValid()) {
+          return res.status(400).json({
+            message: `Invalid date format for holiday: ${holiday.name}. Expected format: YYYY-MM-DD.`,
+          });
+        }
+      }
+
       // Check if holidays for this year already exist
       const existingHolidays = await HolidayService.getHolidaysByYear(year);
 
@@ -38,8 +48,11 @@ module.exports = {
   },
   index: async (req, res, next) => {
     try {
-      const { page = 1, limit = 10, q } = req.query;
-      const record = await HolidayService.getHolidays(q, {
+      const { page = 1, limit = 10, year } = req.query;
+
+      const queryYear = year || moment().year();
+
+      const record = await HolidayService.getHolidays(queryYear, {
         page: parseInt(page),
         limit: parseInt(limit),
       });
@@ -80,35 +93,41 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
 
-      const { holiday_id: year } = req.params;
+      const { holiday_id } = req.params;
 
-      const { holidays } = req.body;
+      const { name, date, is_optional = false } = req.body;
 
-      if (is_admin) {
-        if (holidays || holidays?.length) {
-          // Check if holidays for this year exist
-          const existingHolidays = await HolidayService.getHolidaysByYear(year);
-          if (existingHolidays) {
-            const updatedRecord = await HolidayService.updateHoliday(
-              year,
-              holidays
-            );
-
-            return res.status(200).json(ApiResponse("success", updatedRecord));
-          } else {
-            res
-              .status(404)
-              .json({ message: `No holidays found for the year ${year}` });
-          }
-        } else {
-          res
-            .status(400)
-            .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_ARRAY_FIELDS });
-        }
+      if (!name || !date) {
+        return res
+          .status(400)
+          .json({ message: "Name and date are required fields" });
       } else {
-        res
-          .status(403)
-          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+        // Validate the date format
+        if (!moment(date, "YYYY-MM-DD", true).isValid()) {
+          return res.status(400).json({
+            message: `Invalid date format for holiday: ${name}. Expected format: YYYY-MM-DD.`,
+          });
+        }
+
+        if (is_admin) {
+          const formattedDate = moment(date).format("YYYY-MM-DD");
+
+          const updatedHolidayRecord = await HolidayService.updateHolidayById(
+            holiday_id,
+            { name, date: formattedDate, is_optional }
+          );
+          if (!updatedHolidayRecord) {
+            return res
+              .status(404)
+              .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_NOT_FOUND });
+          }
+
+          res.status(200).json(ApiResponse("success", updatedHolidayRecord));
+        } else {
+          return res
+            .status(403)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+        }
       }
     } catch (error) {
       console.log(error);

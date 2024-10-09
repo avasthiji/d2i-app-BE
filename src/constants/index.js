@@ -41,6 +41,7 @@ const CONSTANTS = {
     HOLIDAY_ARRAY_FIELDS: "Holidays array is required",
     NO_HOLIDAYS_FOR_YEAR: "No holidays found for the year",
     HOLIDAY_CREATING_ERROR: "Error creating holiday record!",
+    HOLIDAY_UPDATING_ERROR: "Error updating holiday",
   },
 };
 module.exports = CONSTANTS;

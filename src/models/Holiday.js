@@ -5,7 +5,7 @@ const holdiaySchema = new mongoose.Schema({
   holidays: [
     {
       name: { type: String, required: true },
-      date: { type: Date, required: true },
+      date: { type: String, required: true },
       is_optional: {
         type: Boolean,
         default: false,

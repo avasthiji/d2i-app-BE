@@ -23,20 +23,15 @@ module.exports.HolidayService = {
       throw new Error("Error creating holiday:" + error.message);
     }
   },
-  getHolidays: async (q, { page, limit }) => {
+  getHolidays: async (queryYear, { page, limit }) => {
     try {
       const skip = (page - 1) * limit;
       const searchQuery = {};
 
-      if (q) {
-        const year = Number(q);
+      if (queryYear) {
+        const year = Number(queryYear);
         if (!isNaN(year)) {
-          searchQuery["$or"] = [
-            { year: year },
-            { "holidays.name": { $regex: q, $options: "i" } },
-          ];
-        } else {
-          searchQuery["holidays.name"] = { $regex: q, $options: "i" };
+          searchQuery["$or"] = [{ year: year }];
         }
       }
       const records = await getRecordsByKey(TABLE_NAMES.HOLIDAY, searchQuery, {
@@ -45,17 +40,25 @@ module.exports.HolidayService = {
         sortField: "date",
         sortOrder: "asc",
       });
+      if (!records || records.length === 0) {
+        return {
+          Holidays: records,
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: page,
+        };
+      } else {
+        const Holidays = records[0].holidays;
 
-      const totalRecords = await TABLE_NAMES.HOLIDAY.countDocuments(
-        searchQuery
-      );
+        const totalRecords = records[0].holidays.length;
 
-      return {
-        records,
-        totalRecords,
-        totalPages: Math.ceil(totalRecords / limit),
-        currentPage: page,
-      };
+        return {
+          Holidays,
+          totalRecords,
+          totalPages: Math.ceil(totalRecords / limit),
+          currentPage: page,
+        };
+      }
     } catch (error) {
       throw new Error("Error Fetching holidays:" + error.message);
     }
@@ -92,24 +95,51 @@ module.exports.HolidayService = {
       throw new Error("Error fetching holidays for year: " + error.message);
     }
   },
-  updateHoliday: async (year, holidays) => {
+  updateHolidayById: async (holiday_id, updatedData) => {
     try {
+      const holidayRecord = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+        "holidays._id": holiday_id,
+      });
+
+      if (!holidayRecord || holidayRecord.length === 0) {
+        throw new Error(CONSTANTS.ERROR_MESSAGES.HOLIDAY_NOT_FOUND);
+      }
+
+      const yearHolidays = holidayRecord[0];
+
+      //index of the holiday to update
+      const holidayIndex = yearHolidays.holidays.findIndex(
+        (holiday) => holiday._id.toString() === holiday_id
+      );
+
+      if (holidayIndex === -1) {
+        throw new Error(CONSTANTS.ERROR_MESSAGES.HOLIDAY_NOT_FOUND);
+      }
+
+      // Prepare the update query
+      const updateQuery = {
+        $set: {
+          [`holidays.${holidayIndex}.name`]: updatedData.name,
+          [`holidays.${holidayIndex}.date`]: updatedData.date,
+          [`holidays.${holidayIndex}.is_optional`]: updatedData.is_optional,
+        },
+      };
+
+      // Update the holiday
       const updatedRecord = await updateRecordsByKey(
         TABLE_NAMES.HOLIDAY,
-        { year },
-        { holidays }
+        { _id: yearHolidays._id },
+        updateQuery
       );
 
       if (!updatedRecord) {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.NO_HOLIDAYS_FOR_YEAR);
+        throw new Error(CONSTANTS.ERROR_MESSAGES.HOLIDAY_UPDATING_ERROR);
+      } else {
+        return updatedRecord;
       }
-
-      return {
-        year: updatedRecord.year,
-        holidays: updatedRecord.holidays,
-      };
     } catch (error) {
-      throw new Error("Error updating Holiday:" + error.message);
+      console.error("Error updating holiday:", error);
+      throw new BadRequestError(error.message);
     }
   },
 };
