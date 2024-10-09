@@ -98,7 +98,7 @@ module.exports = {
       const { name, date, is_optional = false } = req.body;
 
       if (!name || !date) {
-        return res
+         res
           .status(400)
           .json({ message: "Name and date are required fields" });
       } else {
