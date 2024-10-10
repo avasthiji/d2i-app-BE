@@ -39,7 +39,9 @@ module.exports = {
       } else if (action === "punchOut") {
         attendance = await AttendanceService.punchOut(date, user_id, timesheet);
       } else {
-        return res.status(400).json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
+        return res
+          .status(400)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
       }
       res.json(ApiResponse("success", attendance));
     } catch (error) {
@@ -54,37 +56,34 @@ module.exports = {
       const loggedInuserId = req.auth.userId;
 
       if (userId === loggedInuserId) {
-         let { attendanceDate: date } = req.query;
-         if (date) {
-           date = new Date(
-             Date.UTC(
-               new Date(date).getFullYear(),
-               new Date(date).getMonth(),
-               new Date(date).getDate()
-             )
-           );
-         } else {
-           date = new Date(
-             Date.UTC(
-               new Date().getFullYear(),
-               new Date().getMonth(),
-               new Date().getDate()
-             )
-           );
-         }
+        let { attendanceDate: date } = req.query;
+        if (date) {
+          date = new Date(
+            Date.UTC(
+              new Date(date).getFullYear(),
+              new Date(date).getMonth(),
+              new Date(date).getDate()
+            )
+          );
+        } else {
+          date = new Date(
+            Date.UTC(
+              new Date().getFullYear(),
+              new Date().getMonth(),
+              new Date().getDate()
+            )
+          );
+        }
 
-         const attendanceDetails =
-           await AttendanceService.getMyAttendanceDetails(date, loggedInuserId);
+        const attendanceDetails =
+          await AttendanceService.getMyAttendanceDetails(date, loggedInuserId);
 
-         res.json(ApiResponse("success", attendanceDetails || null));
-
-      }else{
-         res
+        res.json(ApiResponse("success", attendanceDetails || null));
+      } else {
+        res
           .status(403)
           .json(ApiResponse("error", CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED));
       }
-
-     
     } catch (error) {
       next(error);
     }
@@ -106,7 +105,9 @@ module.exports = {
         );
         res.json(ApiResponse("success", attendanceRecord || null));
       } else {
-        res.status(403).json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       next(error);

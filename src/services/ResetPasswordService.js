@@ -11,7 +11,6 @@ const {
 const AuthService = require("./AuthService");
 const { sendNotification } = require("../config/onesignal");
 
-
 module.exports.ResetPasswordService = {
   registerUser: async ({ inviteCode, password }) => {
     try {

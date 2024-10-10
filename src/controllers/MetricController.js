@@ -12,7 +12,6 @@ module.exports = {
       });
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -32,7 +31,6 @@ module.exports = {
         res.status(200).json(ApiResponse("success", data));
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -51,7 +49,6 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -72,7 +69,6 @@ module.exports = {
       }
       res.status(200).json(ApiResponse("success", updatedMetric));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -92,7 +88,6 @@ module.exports = {
         .status(200)
         .json({ message: CONSTANTS.ERROR_MESSAGES.METRIC_DELETED });
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },

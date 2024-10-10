@@ -7,7 +7,6 @@ module.exports = {
       const data = await LoginService.loginUser(officialEmail, password);
       res.status(200).json(data);
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },

@@ -17,7 +17,6 @@ module.exports = {
       );
       res.status(201).json(response);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -32,7 +31,6 @@ module.exports = {
 
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },

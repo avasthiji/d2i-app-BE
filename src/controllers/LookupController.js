@@ -8,7 +8,6 @@ module.exports = {
       };
       res.status(200).json(lookups);
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },

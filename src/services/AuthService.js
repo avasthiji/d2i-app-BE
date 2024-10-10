@@ -25,15 +25,6 @@ const AuthService = {
         issuer: jwtconfig.JWT_ISSUER,
       });
 
-      // let userId = authToken.userId;
-      // await authToken.then(user=>{
-      //   console.log('inise authtoekn await');
-
-      //   console.log(user);
-
-      //   userId = user.userId
-      // })
-
       return authToken;
     } catch (e) {
       return null;

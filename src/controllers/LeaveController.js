@@ -18,7 +18,6 @@ module.exports = {
 
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },
@@ -41,7 +40,6 @@ module.exports = {
 
       res.status(200).json(ApiResponse("success", leaves));
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },
@@ -72,7 +70,6 @@ module.exports = {
       const newLeave = await LeaveService.createLeave(leaveData);
       res.status(201).json(ApiResponse("success", newLeave));
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },
@@ -84,9 +81,6 @@ module.exports = {
       const { status } = req.body;
       const managerId = req.auth.userId;
       const { is_admin } = req.auth;
-
-      // console.log('logging req.auth');
-      // console.log(req.auth);
 
       let updatedLeave;
 
@@ -109,7 +103,6 @@ module.exports = {
       }
       res.status(200).json(ApiResponse("success", updatedLeave));
     } catch (error) {
-      console.error(error);
       next(error);
     }
   },

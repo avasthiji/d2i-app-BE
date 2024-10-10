@@ -24,7 +24,6 @@ module.exports = {
 
       res.status(201).json(record);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -40,7 +39,6 @@ module.exports = {
       });
       res.status(200).json(ApiResponse("success", record));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -67,7 +65,6 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -110,7 +107,6 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },

@@ -12,7 +12,6 @@ module.exports = {
       const data = await UserService.getUserByID(userId);
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -69,7 +68,6 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },

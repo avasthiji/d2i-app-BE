@@ -86,7 +86,6 @@ const job = new CronJob("0 9 * * *", async () => {
 });
 
 job.start();
-// console.log('Cron job started');
 
 async function getTodayHoliday() {
   const today = moment().format("YYYY-MM-DD");
@@ -121,4 +120,3 @@ const HolidayJob = new CronJob("0 8 * * *", async () => {
   await CheckHolidayNotifications();
 });
 HolidayJob.start();
-// console.log('holiday job started');
