@@ -11,7 +11,7 @@ const {
 const moment = require("moment/moment");
 
 module.exports.HolidayService = {
-  createHoliday: async (year, holidays) => {
+  createHoliday: async (year, holidays, force = false) => {
     try {
       const existingHolidaysRecord = await await getRecordsByKey(
         TABLE_NAMES.HOLIDAY,
@@ -30,32 +30,28 @@ module.exports.HolidayService = {
       const dateSet = new Set();
       for (const holiday of formattedHolidays) {
         if (dateSet.has(holiday.formattedDate)) {
-          throw new Error(
-            `Duplicate holiday found: ${holiday.formattedDate}`
-          );
+          throw new Error(`Duplicate holiday found: ${holiday.formattedDate}`);
         }
         dateSet.add(holiday.formattedDate);
       }
 
       if (existingHolidaysRecord && existingHolidaysRecord.length > 0) {
-        const existingHolidays = existingHolidaysRecord[0].holidays;
+        if (!force) {
+          throw new Error(`Holidays for the year ${year} already exist.`);
+        } else {
+          const updatedHolidayRecord = await updateRecordsByKey(
+            TABLE_NAMES.HOLIDAY,
+            { year },
+            { holidays: formattedHolidays }
+          );
 
-        // Check for duplicate holiday dates
-        for (const newHoliday of holidays) {
-          const formattedDate = moment(newHoliday.date).format("YYYY-MM-DD");
-          if (
-            HelperFunction.checkDuplicateHolidayDates(
-              existingHolidays,
-              formattedDate
-            )
-          ) {
-            throw new Error(
-              `Can't have two leave on the same date: ${formattedDate}`
-            );
+          if (!updatedHolidayRecord) {
+            throw new Error(CONSTANTS.ERROR_MESSAGES.HOLIDAY_UPDATING_ERROR);
           }
+          return ApiResponse("success", updatedHolidayRecord);
         }
+      } else {
       }
-
       const holidayRecord = await insertRecord(TABLE_NAMES.HOLIDAY, {
         year: year,
         holidays: holidays,

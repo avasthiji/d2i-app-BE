@@ -7,7 +7,7 @@ module.exports = {
   create: async (req, res, next) => {
     try {
       const { is_admin } = req.auth;
-      const { year, holidays } = req.body;
+      const { year, holidays, force = false } = req.body;
 
       if (!is_admin) {
         return res
@@ -20,16 +20,7 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_REQUIRED_FIELDS });
       }
 
-      // Check if holidays for this year already exist
-      const existingHolidays = await HolidayService.getHolidaysByYear(year);
-
-      if (existingHolidays) {
-        return res.status(400).json({
-          message: `Holidays for the year ${year} already exist. Please use update method.`,
-        });
-      }
-
-      const record = await HolidayService.createHoliday(year, holidays);
+      const record = await HolidayService.createHoliday(year, holidays, force);
 
       res.status(201).json(record);
     } catch (error) {
