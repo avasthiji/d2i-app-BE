@@ -20,15 +20,6 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.HOLIDAY_REQUIRED_FIELDS });
       }
 
-      // Validate each holiday date
-      for (const holiday of holidays) {
-        if (!moment(holiday.date, "YYYY-MM-DD", true).isValid()) {
-          return res.status(400).json({
-            message: `Invalid date format for holiday: ${holiday.name}. Expected format: YYYY-MM-DD.`,
-          });
-        }
-      }
-
       // Check if holidays for this year already exist
       const existingHolidays = await HolidayService.getHolidaysByYear(year);
 
@@ -98,9 +89,7 @@ module.exports = {
       const { name, date, is_optional = false } = req.body;
 
       if (!name || !date) {
-         res
-          .status(400)
-          .json({ message: "Name and date are required fields" });
+        res.status(400).json({ message: "Name and date are required fields" });
       } else {
         // Validate the date format
         if (!moment(date, "YYYY-MM-DD", true).isValid()) {
