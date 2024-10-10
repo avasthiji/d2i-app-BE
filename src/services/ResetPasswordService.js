@@ -9,6 +9,7 @@ const {
 } = require("../utils/QueryBuilder");
 
 const AuthService = require("./AuthService");
+const { sendNotification } = require("../config/onesignal");
 
 module.exports.ResetPasswordService = {
   registerUser: async ({ inviteCode, password }) => {
@@ -20,9 +21,7 @@ module.exports.ResetPasswordService = {
       });
 
       if (!user) {
-        throw new ValidationError({
-          message: "Invalid or expired invite code",
-        });
+        throw new Error("Invalid or expired invite code");
       }
 
       // Update the user record to set the password and change the state to 'active'
@@ -37,8 +36,11 @@ module.exports.ResetPasswordService = {
       );
 
       if (!updatedUser) {
-        throw new ValidationError({ message: "User update failed in Signup" });
+        throw new Error("User password reset-request failed");
       }
+
+      const notificationMessage = `Welcome ${updatedUser.firstName} ${updatedUser.lastName}, we just got a new member!`;
+      await sendNotification("New Member Joined", notificationMessage, "All");
 
       // Generate a token
       const authToken = AuthService.createToken(
@@ -61,7 +63,7 @@ module.exports.ResetPasswordService = {
         role: updatedUser.role,
       });
     } catch (error) {
-      throw new ValidationError(error);
+      throw new ValidationError(error.message);
     }
   },
 };

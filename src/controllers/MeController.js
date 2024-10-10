@@ -3,6 +3,7 @@ const fs = require("fs");
 const { UserService } = require("../services/UserService");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { updateUserSchema } = require("../validations/UserValidations");
+const CONSTANTS = require("../constants");
 
 module.exports = {
   index: async (req, res, next) => {
@@ -11,7 +12,6 @@ module.exports = {
       const data = await UserService.getUserByID(userId);
       res.status(200).json(ApiResponse("success", data));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },
@@ -28,7 +28,9 @@ module.exports = {
       } else {
         const existingUser = await UserService.getUserByID(userId);
         if (!existingUser) {
-          return res.status(404).json({ message: "User not found" });
+          return res
+            .status(404)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
         }
         //if file was uploaded, add it to file path of updated data
         if (file) {
@@ -48,22 +50,24 @@ module.exports = {
           updatedData.officialEmail
         ) {
           res.status(403).json({
-            message:
-              "Access denied can't modify ROLE or EmployeeId or OfficialEmail",
+            message: CONSTANTS.ERROR_MESSAGES.NOT_MODIFIABLE,
           });
         }
         if (userId === req.auth.userId) {
           const updatedUser = await UserService.updateUser(userId, updatedData);
           if (!updatedUser) {
-            res.status(404).json({ message: "User not found" });
+            res
+              .status(404)
+              .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
           }
           res.status(200).json(ApiResponse("success", updatedUser));
         } else {
-          res.status(403).json({ message: "Access denied" });
+          res
+            .status(403)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
         }
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   },

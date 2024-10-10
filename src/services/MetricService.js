@@ -1,6 +1,4 @@
-const { options } = require("joi");
 const { NotFoundError } = require("../exceptions");
-const Metric = require("../models/Metric");
 const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
 const {
@@ -10,11 +8,11 @@ const {
   getRecordsByKey,
   insertRecord,
 } = require("../utils/QueryBuilder");
+const CONSTANTS = require("../constants");
 
 module.exports.MetricService = {
   createMetric: async (metricData) => {
     try {
-      // const metric = new Metric(metricData);
       const metric = await insertRecord(TABLE_NAMES.METRICS, metricData);
 
       if (!metric) {
@@ -39,7 +37,7 @@ module.exports.MetricService = {
         _id: metricId,
       });
 
-      if (!metric) throw new Error("Metric not found");
+      if (!metric) throw new Error(CONSTANTS.ERROR_MESSAGES.METRIC_NOT_FOUND);
 
       return ApiResponse("success", metric);
     } catch (error) {
@@ -97,23 +95,6 @@ module.exports.MetricService = {
       throw new Error("Error fetching parent metrics: " + error.message);
     }
   },
-  // Fetch child metrics for a given parentId
-  // getChildMetricsByParentId: async (parentId) => {
-
-  //   try {
-  //     const childMetrics = await getRecordsByKey(Metric, {
-  //       parent_id: parentId,
-  //     });
-
-  //     if (!childMetrics || childMetrics.length === 0) {
-  //       throw new Error("No child metrics found for the given parent ID");
-  //     }
-
-  //     return ApiResponse("success", childMetrics);
-  //   } catch (error) {
-  //     throw new Error("Error fetching child metrics: " + error.message);
-  //   }
-  // },
   getChildMetricsByParentId: async (metricId, q, { page, limit }) => {
     try {
       const parentMetric = await getRecordByKey(TABLE_NAMES.METRICS, {

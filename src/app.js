@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const app = express();
 const path = require("path");
+require("./utils/CronJobber");
 const {
   UnauthorizedError,
   ValidationError,

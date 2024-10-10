@@ -27,7 +27,6 @@ module.exports = {
           next(new UnauthorizedError());
         }
       } catch (error) {
-        console.log(error);
         next(new UnauthorizedError());
       }
     };
