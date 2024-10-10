@@ -7,6 +7,14 @@ const { sendNotification } = require("../config/onesignal");
 const User = require("../models/User");
 const { TABLE_NAMES } = require("./db");
 
+module.exports.HelperFunction = {
+  checkDuplicateHolidayDates: (holidays, newHolidayDate) => {
+    const holidayExists = holidays.some(
+      (holiday) => moment(holiday.date).format("YYYY-MM-DD") === newHolidayDate
+    );
+    return holidayExists;
+  },
+};
 async function getTodayEvents() {
   const today = moment().format("MM-DD");
 
@@ -39,7 +47,6 @@ async function getTodayEvents() {
 
 async function sendDailyNotifications() {
   const events = await getTodayEvents();
-  // console.log(events);
 
   let messageParts = [];
 
@@ -82,14 +89,22 @@ job.start();
 // console.log('Cron job started');
 
 async function getTodayHoliday() {
-  const today = moment().format("MM-DD");
-  const holidays = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
-    $expr: {
-      $eq: [{ $substr: ["$date", 5, 5] }, today],
-    },
+  const today = moment().format("YYYY-MM-DD");
+
+  const records = await getRecordsByKey(TABLE_NAMES.HOLIDAY, {
+    "holidays.date": today,
   });
 
-  return holidays;
+  // Extract holidays that match today
+  let todayHolidays = [];
+  records.forEach((record) => {
+    const matchingHolidays = record.holidays.filter(
+      (holiday) => moment(holiday.date).format("YYYY-MM-DD") === today
+    );
+    todayHolidays = todayHolidays.concat(matchingHolidays);
+  });
+
+  return todayHolidays;
 }
 
 async function CheckHolidayNotifications() {
@@ -97,6 +112,7 @@ async function CheckHolidayNotifications() {
   if (holidays.length > 0) {
     const holidayNames = holidays.map((holiday) => holiday.name).join(",");
     const message = `🎉 Holiday today: ${holidayNames}`;
+
     await sendNotification("Holiday Alert", message, "All");
   }
 }
