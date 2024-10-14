@@ -25,7 +25,7 @@ const updateUserSchema = Joi.object({
     .messages({
       "any.only": "Please select a valid blood group from the list.",
     }),
-  alternateEmail: Joi.string().email().allow(null).optional().messages({
+  alternateEmail: Joi.string().email().allow(null, "").optional().messages({
     "string.email": "Please provide a valid alternate email address.",
   }),
   contactNumber: Joi.string()
@@ -35,7 +35,7 @@ const updateUserSchema = Joi.object({
       "string.pattern.base": "Contact number must be exactly 10 digits.",
     }),
   alternateContactNumber: Joi.string()
-    .allow(null)
+    .allow(null, "")
     .pattern(/^[0-9]{10}$/)
     .optional()
     .messages({
