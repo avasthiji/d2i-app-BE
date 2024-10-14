@@ -34,6 +34,8 @@ const userSchema = new mongoose.Schema({
   },
   inviteCode: { type: String, sparse: true },
   createdAt: { type: Date, default: Date.now },
+  otp: { type: String, default: null },
+  otpGeneratedAt: { type: Date, default: null },
 });
 
 // Pre-save hook to hash the password

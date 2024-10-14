@@ -25,6 +25,7 @@ const AdminController = require("../controllers/AdminController");
 const LeaveController = require("../controllers/LeaveController");
 const NotificationsController = require("../controllers/NotificationsController");
 const HolidayController = require("../controllers/HolidayController");
+const ForgetPasswordController = require("../controllers/ForgetPasswordController");
 
 //authMiddleware
 
@@ -72,6 +73,13 @@ RouteHelper.resource(
   MeController,
   AuthMiddleware.verify(),
   upload
+);
+
+RouteHelper.resource(
+  router,
+  "forgetpassword",
+  ForgetPasswordController,
+  AuthMiddleware.verify()
 );
 
 RouteHelper.resource(
