@@ -75,12 +75,7 @@ RouteHelper.resource(
   upload
 );
 
-RouteHelper.resource(
-  router,
-  "forgetpassword",
-  ForgetPasswordController,
-  AuthMiddleware.verify()
-);
+RouteHelper.resource(router, "forgetpassword", ForgetPasswordController);
 
 RouteHelper.resource(
   router,

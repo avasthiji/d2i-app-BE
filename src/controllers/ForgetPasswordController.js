@@ -16,7 +16,7 @@ module.exports = {
         const { email } = req.body;
         response = await ForgetPasswordService.requestOtp(email);
       } else {
-        return { message: "INVALID body" };
+        return { message: "INVALID BODY" };
       }
       return res.status(200).json(ApiResponse("success", response.message));
     } catch (error) {
