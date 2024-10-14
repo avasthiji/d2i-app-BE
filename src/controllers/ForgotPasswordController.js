@@ -1,4 +1,4 @@
-const { ForgetPasswordService } = require("../services/ForgetPasswordService");
+const { ForgotPasswordService } = require("../services/ForgotPasswordService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
@@ -7,14 +7,14 @@ module.exports = {
       let response;
       if (req.body.otp) {
         const { email, otp, password } = req.body;
-        response = await ForgetPasswordService.resetPasswordWithOtp(
+        response = await ForgotPasswordService.resetPasswordWithOtp(
           email,
           otp,
           password
         );
       } else if (req.body.email) {
         const { email } = req.body;
-        response = await ForgetPasswordService.requestOtp(email);
+        response = await ForgotPasswordService.requestOtp(email);
       } else {
         return { message: "INVALID BODY" };
       }

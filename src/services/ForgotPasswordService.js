@@ -4,26 +4,27 @@ const { HelperFunction } = require("../utils/HelperFunction");
 const transporter = require("../utils/Mailer");
 const { getRecordByKey, updateRecordsByKey } = require("../utils/QueryBuilder");
 
-module.exports.ForgetPasswordService = {
+module.exports.ForgotPasswordService = {
   requestOtp: async (email) => {
     try {
       const user = await getRecordByKey(TABLE_NAMES.USERS, {
         officialEmail: email,
       });
-      const otp = HelperFunction.generateOtp();
+      if (user) {
+        const otp = HelperFunction.generateOtp();
 
-      user.otp = otp;
-      user.otpGeneratedAt = Date.now() + 300000;
+        user.otp = otp;
+        user.otpGeneratedAt = Date.now() + 300000;
 
-      await user.save();
-      const mailOptions = {
-        from: process.env.EMAIL_FROM,
-        to: user.officialEmail,
-        subject: "Your OTP for password reset",
-        html: `<p>Your OTP for password reset is: <strong>${otp}</strong>. It is valid for the next 5 minutes.</p>`,
-      };
-
-      await transporter.sendMail(mailOptions);
+        await user.save();
+        const mailOptions = {
+          from: process.env.EMAIL_FROM,
+          to: user.officialEmail,
+          subject: "Your OTP for password reset",
+          html: `<p>Your OTP for password reset is: <strong>${otp}</strong>. It is valid for the next 5 minutes.</p>`,
+        };
+        await transporter.sendMail(mailOptions);
+      }
 
       return { message: "OTP sent to your email." };
     } catch (error) {
