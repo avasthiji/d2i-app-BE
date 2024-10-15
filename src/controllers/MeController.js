@@ -17,7 +17,7 @@ module.exports = {
   },
   update: async (req, res, next) => {
     try {
-      const { file } = req;
+      const { files } = req;
       const userId = req.params.me_id;
       const updatedData = req.body;
 
@@ -33,7 +33,7 @@ module.exports = {
             .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
         }
         //if file was uploaded, add it to file path of updated data
-        if (file) {
+        if (files) {
           //file path for old image
           const oldImagePath = existingUser.userProfile;
           //check if an old image exists and delete it
@@ -41,7 +41,7 @@ module.exports = {
             fs.unlinkSync(oldImagePath);
           }
           //saving new file path
-          updatedData.userProfile = req.file.filename;
+          updatedData.userProfile = req.files.filename;
         }
 
         if (
