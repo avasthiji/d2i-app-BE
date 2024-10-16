@@ -32,7 +32,7 @@ module.exports.FileService = {
   },
   lookForFile: async (name) => {
     try {
-      const records = await getRecordsByKey(TABLE_NAMES.FILE, { name });
+      const records = await getRecordByKey(TABLE_NAMES.FILE, { name });
       return records;
     } catch (error) {
       console.log(error);
@@ -41,8 +41,15 @@ module.exports.FileService = {
   },
   getFileById: async (file_id) => {
     try {
-      const record = await getRecordByKey(TABLE_NAMES.FILE, { _id: file_id });
-      return ApiResponse("success", record);
+      const record = await getRecordByKey(TABLE_NAMES.FILE, {
+        "fileNames._id": file_id,
+      });
+      const value = record.fileNames.filter((data) => {
+        if (data._id.toString() === file_id) {
+          return data;
+        }
+      });
+      return value;
     } catch (error) {
       console.log(error);
       throw new BadRequestError(error.message);
@@ -51,7 +58,7 @@ module.exports.FileService = {
   updateFileUpload: async (file_id, uploadedFileName) => {
     try {
       const record = await getRecordByKey(TABLE_NAMES.FILE, { _id: file_id });
-      record.fileNames.push(uploadedFileName);
+      record.fileNames.push({ name: uploadedFileName });
 
       const data = await updateRecordsByKey(
         TABLE_NAMES.FILE,

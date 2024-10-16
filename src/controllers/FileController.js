@@ -1,4 +1,5 @@
 const { FileService } = require("../services/FileService");
+const { ApiResponse } = require("../utils/ApiHelper");
 
 module.exports = {
   create: async (req, res, next) => {
@@ -9,7 +10,7 @@ module.exports = {
       if (is_admin) {
         if (req.files) {
           const data = await FileService.lookForFile(name);
-          if (data.length > 0) {
+          if (data) {
             return res.status(400).json({
               message: "Record already exist please use update method",
             });
@@ -17,10 +18,10 @@ module.exports = {
             const uploadedFileName = req.files.uploadFile[0].originalname;
             const fileData = {
               name: name,
-              fileNames: [uploadedFileName],
+              fileNames: [{ name: uploadedFileName }],
             };
             const data = await FileService.createFile(fileData);
-            return res.status(201).json(data);
+            return res.status(201).json(ApiResponse("success", data));
           }
         } else {
           return res.status(400).json({ message: "No file uploaded." });
@@ -43,9 +44,14 @@ module.exports = {
   show: async (req, res, next) => {
     try {
       const { file_id } = req.params;
-
-      const record = await FileService.getFileById(file_id);
-      res.status(200).json(record);
+      const { q } = req.query;
+      let record;
+      if (q) {
+        record = await FileService.getFileById(q);
+      } else {
+        record = await FileService.lookForFile(file_id);
+      }
+      res.status(200).json(ApiResponse("success", record));
     } catch (error) {
       next(error);
     }
@@ -54,6 +60,7 @@ module.exports = {
     try {
       const { file_id } = req.params;
       const uploadedFileName = req.files.uploadFile[0].originalname;
+
       const data = await FileService.updateFileUpload(
         file_id,
         uploadedFileName

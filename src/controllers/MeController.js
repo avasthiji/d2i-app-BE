@@ -40,8 +40,7 @@ module.exports = {
           if (fs.existsSync(oldImagePath)) {
             fs.unlinkSync(oldImagePath);
           }
-          //saving new file path
-          updatedData.userProfile = req.files.filename;
+          updatedData.userProfile = req.files.userProfile[0].filename;
         }
 
         if (

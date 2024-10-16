@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === "userProfile") {
       cb(null, uploadDir);
-    } else if (file.fieldname === "uploadFile") {
+    } else if (file.fieldname === "uploadFile") {     
       cb(null, fileUploadDir);
     }
   },
