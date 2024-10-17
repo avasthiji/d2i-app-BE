@@ -137,7 +137,7 @@ module.exports.FileService = {
             $set: {
               fileNames: {
                 $map: {
-                  input: "$fileNames", // Iterate over each element in the fileNames array
+                  input: "$fileNames", 
                   as: "elem", // Alias for each array element
                   in: {
                     $cond: {
