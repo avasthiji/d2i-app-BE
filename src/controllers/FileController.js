@@ -1,3 +1,4 @@
+const CONSTANTS = require("../constants");
 const { FileService } = require("../services/FileService");
 const { ApiResponse } = require("../utils/ApiHelper");
 
@@ -10,10 +11,15 @@ module.exports = {
       if (is_admin) {
         if (req.files) {
           const data = await FileService.lookForFile(name);
+
           if (data) {
-            return res.status(400).json({
-              message: "Record already exist please use update method",
-            });
+            const file_id = data._id.toString();
+            const uploadedFileName = req.files.uploadFile[0].originalname;
+            const response = await FileService.updateFileUpload(
+              file_id,
+              uploadedFileName
+            );
+            return res.status(201).json(response);
           } else {
             const uploadedFileName = req.files.uploadFile[0].originalname;
             const fileData = {
@@ -27,7 +33,7 @@ module.exports = {
           return res.status(400).json({ message: "No file uploaded." });
         }
       } else {
-        res.status(403).json({ message: "access denied in file controller" });
+        res.status(403).json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
       next(error);
@@ -35,8 +41,11 @@ module.exports = {
   },
   index: async (req, res, next) => {
     try {
-      const records = await FileService.getAllFiles();
-      res.status(200).json(records);
+      const { name } = req.query;
+      const userRole = req.auth.userRole;
+      const records = await FileService.getAllFiles(userRole, name);
+
+      res.status(200).json(ApiResponse("success", records));
     } catch (error) {
       next(error);
     }
@@ -44,13 +53,10 @@ module.exports = {
   show: async (req, res, next) => {
     try {
       const { file_id } = req.params;
-      const { q } = req.query;
+      const { name } = req.query;
+
       let record;
-      if (q) {
-        record = await FileService.getFileById(q);
-      } else {
-        record = await FileService.lookForFile(file_id);
-      }
+      record = await FileService.getFileById(file_id);
       res.status(200).json(ApiResponse("success", record));
     } catch (error) {
       next(error);
@@ -59,19 +65,39 @@ module.exports = {
   update: async (req, res, next) => {
     try {
       const { file_id } = req.params;
-      const uploadedFileName = req.files.uploadFile[0].originalname;
+      const { is_active, names } = req.body;
+      const { is_admin } = req.auth;
 
-      const data = await FileService.updateFileUpload(
-        file_id,
-        uploadedFileName
-      );
-      res.status(200).json(data);
+      if (is_admin) {
+        const data = await FileService.updateFileStatus(
+          file_id,
+          is_active,
+          names
+        );
+         res.status(200).json(data);
+      } else {
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+      }
     } catch (error) {
       next(error);
     }
   },
   delete: async (req, res, next) => {
     try {
+      const { file_id } = req.params;
+      const { names } = req.body;
+      const { is_admin } = req.auth;
+
+      if (is_admin) {
+        const deletedDocs = await FileService.softDeleteFile(file_id,names);
+        return deletedDocs;
+      } else {
+        res
+          .status(403)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
+      }
     } catch (error) {
       next(error);
     }

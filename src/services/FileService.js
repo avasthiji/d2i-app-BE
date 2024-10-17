@@ -1,9 +1,8 @@
+const mongoose = require("mongoose");
 const { BadRequestError } = require("../exceptions");
-const { ApiResponse } = require("../utils/ApiHelper");
 const { TABLE_NAMES } = require("../utils/db");
 const {
   insertRecord,
-  getRecordsByKey,
   getRecordByKey,
   updateRecordsByKey,
 } = require("../utils/QueryBuilder");
@@ -21,10 +20,26 @@ module.exports.FileService = {
       throw new BadRequestError(error.message);
     }
   },
-  getAllFiles: async () => {
+  getAllFiles: async (userRole, name) => {
     try {
-      const records = await getRecordsByKey(TABLE_NAMES.FILE, {});
-      return ApiResponse("success", records);
+      let records;
+      if (userRole === "ADMIN") {
+        records = await getRecordByKey(TABLE_NAMES.FILE, { name });
+      } else {
+        records = await getRecordByKey(TABLE_NAMES.FILE, { name });
+        if (records) {
+          const filteredFileNames = records.fileNames.filter(
+            (file) => file.is_active === true
+          );
+          return {
+            ...records._doc, // Return all other fields in the document
+            fileNames: filteredFileNames, // Return the filtered fileNames array
+          };
+        } else {
+          return null;
+        }
+      }
+      return  records;
     } catch (error) {
       console.log(error);
       throw new BadRequestError(error.message);
@@ -32,8 +47,9 @@ module.exports.FileService = {
   },
   lookForFile: async (name) => {
     try {
-      const records = await getRecordByKey(TABLE_NAMES.FILE, { name });
-      return records;
+      const record = await getRecordByKey(TABLE_NAMES.FILE, { name });
+
+      return record;
     } catch (error) {
       console.log(error);
       throw new BadRequestError(error.message);
@@ -50,6 +66,47 @@ module.exports.FileService = {
         }
       });
       return value;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestError(error.message);
+    }
+  },
+  updateFileStatus: async (file_id, is_active, names) => {
+    try {
+      const response = await TABLE_NAMES.FILE.findOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(file_id) }, // Match the document by _id
+        [
+          {
+            $set: {
+              fileNames: {
+                $map: {
+                  input: "$fileNames", // Iterate over each element in the fileNames array
+                  as: "elem", // Alias for each array element
+                  in: {
+                    $cond: {
+                      if: {
+                        $in: [
+                          "$$elem._id",
+                          names.map(
+                            (name) => new mongoose.Types.ObjectId(name)
+                          ),
+                        ],
+                      }, // Check if elem._id is in the names array
+                      then: {
+                        $mergeObjects: ["$$elem", { is_active: is_active }], // Update is_active field
+                      },
+                      else: "$$elem", // Leave the element unchanged if not in names array
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+        { new: true } // Option to return the updated document
+      );
+
+      return response;
     } catch (error) {
       console.log(error);
       throw new BadRequestError(error.message);
@@ -72,6 +129,47 @@ module.exports.FileService = {
       } else {
         return { message: "Something went wrong" };
       }
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestError(error.message);
+    }
+  },
+  softDeleteFile: async (file_id, names) => {
+    try {
+      const response = await TABLE_NAMES.FILE.findOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(file_id) }, // Match the document by _id
+        [
+          {
+            $set: {
+              fileNames: {
+                $map: {
+                  input: "$fileNames", // Iterate over each element in the fileNames array
+                  as: "elem", // Alias for each array element
+                  in: {
+                    $cond: {
+                      if: {
+                        $in: [
+                          "$$elem._id",
+                          names.map(
+                            (name) => new mongoose.Types.ObjectId(name)
+                          ),
+                        ],
+                      }, // Check if elem._id is in the names array
+                      then: {
+                        $mergeObjects: ["$$elem", { is_active: false }], // Update is_active field
+                      },
+                      else: "$$elem", // Leave the element unchanged if not in names array
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+        { new: true } // Option to return the updated document
+      );
+
+      return response;
     } catch (error) {
       console.log(error);
       throw new BadRequestError(error.message);
