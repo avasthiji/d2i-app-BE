@@ -28,7 +28,6 @@ module.exports.ForgotPasswordService = {
 
       return { message: "OTP sent to your email." };
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -53,7 +52,6 @@ module.exports.ForgotPasswordService = {
         }
       }
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },

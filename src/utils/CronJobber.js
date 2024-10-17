@@ -57,7 +57,6 @@ async function sendDailyNotifications() {
       .join(", ");
 
     for (let i = 0; i < events.birthdays.length; i++) {
-      console.log(events.birthdays[i].officialEmail);
       const birthdayPerson = events.birthdays[i];
 
       const mailOptions = {

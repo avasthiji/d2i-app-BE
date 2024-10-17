@@ -16,7 +16,6 @@ module.exports.FileService = {
 
       return file;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -41,7 +40,6 @@ module.exports.FileService = {
       }
       return  records;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -51,7 +49,6 @@ module.exports.FileService = {
 
       return record;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -67,7 +64,6 @@ module.exports.FileService = {
       });
       return value;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -108,7 +104,6 @@ module.exports.FileService = {
 
       return response;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -130,7 +125,6 @@ module.exports.FileService = {
         return { message: "Something went wrong" };
       }
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -171,7 +165,6 @@ module.exports.FileService = {
 
       return response;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
