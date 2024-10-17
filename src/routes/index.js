@@ -25,6 +25,8 @@ const AdminController = require("../controllers/AdminController");
 const LeaveController = require("../controllers/LeaveController");
 const NotificationsController = require("../controllers/NotificationsController");
 const HolidayController = require("../controllers/HolidayController");
+const ForgotPasswordController = require("../controllers/ForgotPasswordController");
+const FileController = require("../controllers/FileController");
 
 //authMiddleware
 
@@ -74,6 +76,8 @@ RouteHelper.resource(
   upload
 );
 
+RouteHelper.resource(router, "forgotpassword", ForgotPasswordController);
+
 RouteHelper.resource(
   router,
   "attendance",
@@ -95,5 +99,13 @@ RouteHelper.resource(
   "holiday",
   HolidayController,
   AuthMiddleware.verify()
+);
+
+RouteHelper.resource(
+  router,
+  "file",
+  FileController,
+  AuthMiddleware.verify(["ADMIN", "USER"]),
+  upload
 );
 module.exports.router = router;
