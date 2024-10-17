@@ -1,4 +1,5 @@
 const { CronJob } = require("cron");
+const transporter = require("../utils/Mailer");
 
 const moment = require("moment");
 const { getRecordsByKey } = require("./QueryBuilder");
@@ -54,6 +55,33 @@ async function sendDailyNotifications() {
     const birthdayNames = events.birthdays
       .map((user) => user.firstName + " " + user.lastName)
       .join(", ");
+
+    for (let i = 0; i < events.birthdays.length; i++) {
+      console.log(events.birthdays[i].officialEmail);
+      const birthdayPerson = events.birthdays[i];
+
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: birthdayPerson.officialEmail,
+        subject: "Happy Birthday Wish",
+        cc: `${process.env.COMPANY_EMAIL}, ${process.env.EMAIL_FROM}`,
+        html: `<p>Hey ${birthdayPerson.firstName} ${birthdayPerson.lastName},
+        </p>
+        <p>
+        Wishing you a fantastic birthday filled with joy and celebration! May your year ahead be as incredible as you are.
+        </p>
+        <p>
+        Best wishes,<br>
+        D2i Technologies
+       </p>
+       <p>
+        Short, sweet, and heartfelt. Cheers to celebrating another year!🍰
+      </p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
+
     messageParts.push(`🎉 It's ${birthdayNames}'s birthday today!`);
   }
 
@@ -81,7 +109,7 @@ async function sendDailyNotifications() {
   }
 }
 
-const job = new CronJob("0 9 * * *", async () => {
+const job = new CronJob("0 13 * * *", async () => {
   await sendDailyNotifications();
 });
 
