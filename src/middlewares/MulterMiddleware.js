@@ -5,7 +5,7 @@ const path = require("path");
 // Ensure uploads directory exists
 const uploadDir = path.resolve(process.env.UPLOAD_DIR);
 
-const fileUploadDir = path.resolve(process.env.UPLOAD_FILE);
+const fileUploadDir = path.resolve(process.env.UPLOAD_DIR);
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
