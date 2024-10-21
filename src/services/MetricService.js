@@ -113,7 +113,7 @@ module.exports.MetricService = {
       const searchQuery = {
         parent_id: metricId,
       };
-      if (searchQuery) {
+      if (searchQuery && q) {
         searchQuery["$or"] = [{ label: { $regex: q, $options: "i" } }];
       }
       const skip = (page - 1) * limit;
