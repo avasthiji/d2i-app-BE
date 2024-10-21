@@ -27,8 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/api/uploads/image", express.static(process.env.UPLOAD_DIR));
-app.use("/api/uploads/files", express.static(process.env.UPLOAD_DIR));
+app.use("/api/uploads", express.static(process.env.UPLOAD_DIR));
 app.use("/api/v1", router);
 
 // catch 404 and forward to error handler

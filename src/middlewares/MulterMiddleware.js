@@ -4,7 +4,6 @@ const path = require("path");
 
 // Ensure uploads directory exists
 const uploadDir = path.resolve(process.env.UPLOAD_DIR);
-
 const fileUploadDir = path.resolve(process.env.UPLOAD_DIR);
 
 if (!fs.existsSync(uploadDir)) {
@@ -18,7 +17,7 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === "userProfile") {
       cb(null, uploadDir);
-    } else if (file.fieldname === "uploadFile") {     
+    } else if (file.fieldname === "uploadFile") {
       cb(null, fileUploadDir);
     }
   },
