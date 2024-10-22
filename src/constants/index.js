@@ -1,7 +1,6 @@
 require("dotenv").config();
 const CONSTANTS = {
   URL: {
-    LOGIN_URL: `${process.env.BASEURL}/login`,
     INVITE_URL: `${process.env.BASEURLFE}/reset-password?inviteCode=`,
     LEAVE_URL: `${process.env.BASEURLFE}/leave`,
   },
@@ -42,6 +41,7 @@ const CONSTANTS = {
     NO_HOLIDAYS_FOR_YEAR: "No holidays found for the year",
     HOLIDAY_CREATING_ERROR: "Error creating holiday record!",
     HOLIDAY_UPDATING_ERROR: "Error updating holiday",
+    FILE_UPLOAD_SUCCESS: "File Uploaded Successfully",
   },
 };
 module.exports = CONSTANTS;

@@ -6,6 +6,7 @@ const {
   getRecordByKey,
   updateRecordsByKey,
 } = require("../utils/QueryBuilder");
+const CONSTANTS = require("../constants");
 
 module.exports.FileService = {
   createFile: async (fileData) => {
@@ -38,7 +39,7 @@ module.exports.FileService = {
           return null;
         }
       }
-      return  records;
+      return records;
     } catch (error) {
       throw new BadRequestError(error.message);
     }
@@ -120,9 +121,9 @@ module.exports.FileService = {
         }
       );
       if (data) {
-        return { message: "File uploaded Successfully" };
+        return { message: CONSTANTS.ERROR_MESSAGES.FILE_UPLOAD_SUCCESS };
       } else {
-        return { message: "Something went wrong" };
+        return { message: CONSTANTS.ERROR_MESSAGES.SOMETHING_WRONG };
       }
     } catch (error) {
       throw new BadRequestError(error.message);
@@ -137,7 +138,7 @@ module.exports.FileService = {
             $set: {
               fileNames: {
                 $map: {
-                  input: "$fileNames", 
+                  input: "$fileNames",
                   as: "elem", // Alias for each array element
                   in: {
                     $cond: {

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const metricSchema = new mongoose.Schema({
   label: { type: String, required: true },
+  description: { type: String, required: true, default: null },
   maximum_points: { type: Number, required: true },
   is_active: { type: Boolean, required: true },
   parent_id: {
