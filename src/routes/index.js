@@ -27,6 +27,7 @@ const NotificationsController = require("../controllers/NotificationsController"
 const HolidayController = require("../controllers/HolidayController");
 const ForgotPasswordController = require("../controllers/ForgotPasswordController");
 const FileController = require("../controllers/FileController");
+const SecureMessageController = require("../controllers/SecureMessageController");
 
 //authMiddleware
 
@@ -107,5 +108,12 @@ RouteHelper.resource(
   FileController,
   AuthMiddleware.verify(["ADMIN", "USER"]),
   upload
+);
+
+RouteHelper.resource(
+  router,
+  "secureMessage",
+  SecureMessageController,
+  AuthMiddleware.verify()
 );
 module.exports.router = router;
