@@ -24,31 +24,11 @@ module.exports = {
         secretMessage = await SecretMessageService.readSecureMessage({
           securemessage_id,
           secretKey,
-          recipient_id,
+          sender_id,
         });
       }
 
-      res
-        .status(201)
-        .json({ message: "Message sent successfully", secretMessage });
-    } catch (error) {
-      next(error);
-    }
-  },
-  show: async (req, res, next) => {
-    try {
-      const { securemessage_id } = req.params;
-
-      const { secretKey } = req.body;
-      const { userId: recipient_id } = req.auth;
-
-      const decryptMessage = await SecretMessageService.readSecureMessage({
-        securemessage_id,
-        secretKey,
-        recipient_id,
-      });
-
-      res.status(200).json(ApiResponse("success", decryptMessage));
+      res.status(201).json(ApiResponse("success", secretMessage));
     } catch (error) {
       next(error);
     }

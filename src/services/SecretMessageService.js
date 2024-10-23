@@ -5,7 +5,6 @@ const { HelperFunction } = require("../utils/HelperFunction");
 const {
   insertRecord,
   getRecordByKey,
-  getRecordsByKey,
   deleteRecordsById,
 } = require("../utils/QueryBuilder");
 const CONSTANTS = require("../constants");
@@ -31,17 +30,16 @@ module.exports.SecretMessageService = {
 
       return record;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
-  readSecureMessage: async ({ securemessage_id, secretKey, recipient_id }) => {
+  readSecureMessage: async ({ securemessage_id, secretKey, sender_id }) => {
     try {
       const messageRecord = await getRecordByKey(TABLE_NAMES.SECUREMESSAGE, {
         _id: securemessage_id,
       });
 
-      if (messageRecord) {
+      if (messageRecord && messageRecord.user_id.toString() === sender_id) {
         const decryptedMessage = HelperFunction.decryptMessage(
           messageRecord.message,
           secretKey
@@ -49,10 +47,9 @@ module.exports.SecretMessageService = {
 
         return decryptedMessage;
       } else {
-        return "something went wrong";
+        throw new Error({ message: "Bad request" });
       }
     } catch (error) {
-      console.log(error.reason);
       throw new BadRequestError(error.reason);
     }
   },
@@ -86,7 +83,6 @@ module.exports.SecretMessageService = {
 
       return messages;
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
@@ -95,32 +91,24 @@ module.exports.SecretMessageService = {
       const messageRecord = await getRecordByKey(TABLE_NAMES.SECUREMESSAGE, {
         _id: securemessage_id,
       });
-      console.log("here");
       if (messageRecord) {
         if (
           userId === messageRecord.user_id.toString() ||
           userId === messageRecord.sender_id.toString()
         ) {
-          console.log("isnide");
-
           const deleteMessage = await deleteRecordsById(
             TABLE_NAMES.SECUREMESSAGE,
             { _id: securemessage_id }
           );
-          console.log(deleteMessage);
-          console.log({ message: "Messge deleted Successfully" });
 
-          return "Messge deleted Successfully";
+          return CONSTANTS.ERROR_MESSAGES.MESSAGE_DELETE_SUCCESS;
         } else {
-          console.log("osnnide");
-
-          return "Access denied";
+          return CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED;
         }
       } else {
-        return "No record found";
+        return CONSTANTS.ERROR_MESSAGES.RECORD_NOT_FOUND;
       }
     } catch (error) {
-      console.log(error);
       throw new BadRequestError(error.message);
     }
   },
