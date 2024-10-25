@@ -33,7 +33,8 @@ module.exports = {
             .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
         }
         //if file was uploaded, add it to file path of updated data
-        if (files) {
+
+        if (files && files.userProfile) {
           //file path for old image
           const oldImagePath = existingUser.userProfile;
           //check if an old image exists and delete it
