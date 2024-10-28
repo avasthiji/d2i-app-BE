@@ -185,7 +185,9 @@ module.exports.LeaveService = {
         status: "pending",
       });
 
-      const applyLeaveLink = `${CONSTANTS.URL.LEAVE_URL}`;
+      let leaveId = newLeave._id.toString();
+      const applyLeaveLink = `${CONSTANTS.URL.LEAVE_URL}/${leaveId}?page=1&status=`;
+
       const mailOptions = {
         from: user.officialEmail,
         to: manager.officialEmail,

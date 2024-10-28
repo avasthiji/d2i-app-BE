@@ -25,6 +25,8 @@ module.exports.UserService = {
       const users = await getRecordsByKey(TABLE_NAMES.USERS, filter, {
         limit,
         skip: skips,
+        sortField: "firstName",
+        sortOrder: "asc",
       });
 
       const totalRecords = await getRecordsByKey(TABLE_NAMES.USERS, filter);

@@ -14,7 +14,14 @@ module.exports = {
       const query = req.query.q;
       const includeSelf = req.query.includeSelf === "true";
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      let limit = parseInt(req.query.limit);
+
+      if (isNaN(limit)) {
+        limit = 10;
+      }
+      if (limit === 0) {
+        limit = null;
+      }
 
       let data;
       if (query && !query.includeSelf) {

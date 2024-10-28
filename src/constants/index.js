@@ -42,6 +42,8 @@ const CONSTANTS = {
     HOLIDAY_CREATING_ERROR: "Error creating holiday record!",
     HOLIDAY_UPDATING_ERROR: "Error updating holiday",
     FILE_UPLOAD_SUCCESS: "File Uploaded Successfully",
+    MESSAGE_DELETE_SUCCESS: "Messge deleted Successfully",
+    RECORD_NOT_FOUND: "Record not found",
   },
 };
 module.exports = CONSTANTS;
