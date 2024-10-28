@@ -71,7 +71,7 @@ async function sendDailyNotifications() {
         </p>
         <p>
         Best wishes,<br>
-        D2i Technologies
+        D2i Technology
        </p>
        <p>
         Short, sweet, and heartfelt. Cheers to celebrating another year!🍰
@@ -108,7 +108,7 @@ async function sendDailyNotifications() {
   }
 }
 
-const job = new CronJob("0 13 * * *", async () => {
+const job = new CronJob("0 6 * * *", async () => {
   await sendDailyNotifications();
 });
 
@@ -143,7 +143,7 @@ async function CheckHolidayNotifications() {
   }
 }
 
-const HolidayJob = new CronJob("0 8 * * *", async () => {
+const HolidayJob = new CronJob("0 6 * * *", async () => {
   await CheckHolidayNotifications();
 });
 HolidayJob.start();
