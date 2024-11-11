@@ -90,13 +90,14 @@ module.exports.AttendanceService = {
           throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
         }
         if (timesheet) {
+          const updatedSheet = timesheet.replace(/\n/g,'<br>');
           const emailOptions = {
             from: user.officialEmail,
             to: manager.officialEmail,
             subject: "Employee Timesheet",
             html: `<p>Hello ${manager.firstName},</p>
             <p>${user.firstName} has submitted their timesheet for today's attendance:</p>
-            <p>${timesheet}</p>
+            <p>${updatedSheet}</p>
             <p>Working duration: ${workingDuration} minutes</p>`,
           };
           await transporter.sendMail(emailOptions);
