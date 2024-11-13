@@ -60,7 +60,7 @@ async function sendDailyNotifications() {
       const birthdayPerson = events.birthdays[i];
 
       const mailOptions = {
-        from: process.env.EMAIL_FROM,
+        from: `"D2i Technology" <${process.env.EMAIL_FROM}>`,
         to: birthdayPerson.officialEmail,
         subject: "Happy Birthday Wish",
         cc: `${process.env.COMPANY_EMAIL}, ${process.env.EMAIL_FROM}`,

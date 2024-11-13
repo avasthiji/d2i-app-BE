@@ -69,7 +69,7 @@ module.exports = {
           const inviteLink = `${CONSTANTS.URL.INVITE_URL}${newUser.inviteCode}`;
 
           const mailOptions = {
-            from: process.env.EMAIL_FROM,
+            from: `"D2i Technology" <${process.env.EMAIL_FROM}>`,
             to: newUser.officialEmail,
             subject: "Your Account Has Been Created",
             html: `<p>Hello ${newUser.firstName},</p>

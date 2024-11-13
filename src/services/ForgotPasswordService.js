@@ -18,7 +18,7 @@ module.exports.ForgotPasswordService = {
 
         await user.save();
         const mailOptions = {
-          from: process.env.EMAIL_FROM,
+          from: `"D2i Technology" <${process.env.EMAIL_FROM}>`,
           to: user.officialEmail,
           subject: "Your OTP for password reset",
           html: `<p>Your OTP for password reset is: <strong>${otp}</strong>. It is valid for the next 5 minutes.</p>`,

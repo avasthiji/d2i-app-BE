@@ -92,7 +92,7 @@ module.exports.AttendanceService = {
         if (timesheet) {
           const updatedSheet = timesheet.replace(/\n/g,'<br>');
           const emailOptions = {
-            from: user.officialEmail,
+            from: `"D2i Technology" <${user.officialEmail}>`,
             to: manager.officialEmail,
             subject: "Employee Timesheet",
             html: `<p>Hello ${manager.firstName},</p>
