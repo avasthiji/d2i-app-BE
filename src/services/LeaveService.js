@@ -189,7 +189,7 @@ module.exports.LeaveService = {
       const applyLeaveLink = `${CONSTANTS.URL.LEAVE_URL}/${leaveId}?page=1&status=`;
 
       const mailOptions = {
-        from: user.officialEmail,
+        from: `"D2i Technology" <${user.officialEmail}>`,
         to: manager.officialEmail,
         subject: "New Leave Application",
         html: `<p>Hello ${manager.firstName},</p>
@@ -235,7 +235,7 @@ module.exports.LeaveService = {
       });
       const approveLeaveLink = `${CONSTANTS.URL.LEAVE_URL}/${user._id}`;
       const mailOptions = {
-        from: manager.officialEmail,
+        from: `"D2i Technology" <${manager.officialEmail}>`,
         to: user.officialEmail,
         subject: "Leave Approved",
         html: `<p>Hello ${user.firstName},</p>
@@ -278,7 +278,7 @@ module.exports.LeaveService = {
 
       const leaveLink = `${CONSTANTS.URL.LEAVE_URL}/${user._id}`;
       const mailOptions = {
-        from: manager.officialEmail,
+        from: `"D2i Technology" <${manager.officialEmail}>`,
         to: user.officialEmail,
         subject: "Leave Rejected",
         html: `<p>Hello ${user.firstName},</p>
