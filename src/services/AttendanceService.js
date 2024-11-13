@@ -4,6 +4,7 @@ const Attendance = require("../models/Attendance");
 const { TABLE_NAMES } = require("../utils/db");
 const transporter = require("../utils/Mailer");
 const { getRecordByKey, insertRecord } = require("../utils/QueryBuilder");
+const { HelperFunction } = require("../utils/HelperFunction");
 
 module.exports.AttendanceService = {
   punchIn: async (date, user_id) => {
@@ -90,7 +91,8 @@ module.exports.AttendanceService = {
           throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
         }
         if (timesheet) {
-          const updatedSheet = timesheet.replace(/\n/g,'<br>');
+          const updatedSheet = timesheet.replace(/\n/g, "<br>");
+          const formattedDuration = HelperFunction.formatDuration(workingDuration);
           const emailOptions = {
             from: `"D2i Technology" <${user.officialEmail}>`,
             to: manager.officialEmail,
@@ -98,7 +100,7 @@ module.exports.AttendanceService = {
             html: `<p>Hello ${manager.firstName},</p>
             <p>${user.firstName} has submitted their timesheet for today's attendance:</p>
             <p>${updatedSheet}</p>
-            <p>Working duration: ${workingDuration} minutes</p>`,
+            <p>Working duration: ${formattedDuration}</p>`,
           };
           await transporter.sendMail(emailOptions);
         }
