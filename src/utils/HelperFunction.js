@@ -17,6 +17,14 @@ module.exports.HelperFunction = {
 
     return otp;
   },
+  formatDuration(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}hr ${mins}mins`;
+    }
+    return `${mins} mins`;
+  },
   encryptMessage: (message, secretKey) => {
     const algorithm = "aes-256-cbc";
     const iv = crypto.randomBytes(16);
