@@ -17,9 +17,11 @@ module.exports.HelperFunction = {
 
     return otp;
   },
-  formatDuration(minutes) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+  formatDuration: (minutes) => {
+    const duration = moment.duration(minutes, "minutes");
+    const hours = duration.hours();
+    const mins = duration.minutes();
+
     if (hours > 0) {
       return `${hours}hr ${mins}mins`;
     }

@@ -5,6 +5,7 @@ const { TABLE_NAMES } = require("../utils/db");
 const transporter = require("../utils/Mailer");
 const { getRecordByKey, insertRecord } = require("../utils/QueryBuilder");
 const { HelperFunction } = require("../utils/HelperFunction");
+const moment = require("moment/moment");
 
 module.exports.AttendanceService = {
   punchIn: async (date, user_id) => {
@@ -73,10 +74,11 @@ module.exports.AttendanceService = {
         throw new Error(CONSTANTS.ERROR_MESSAGES.ALREADY_PUNCHED_OUT);
       }
       employeeRecord.punchOutTime = new Date();
-      const workingDuration = Math.ceil(
-        (employeeRecord.punchOutTime - employeeRecord.punchInTime) / (1000 * 60)
-      );
-      employeeRecord.workingDuration = workingDuration;
+      const punchInTime = moment(employeeRecord.punchInTime);
+      const punchOutTime = moment(employeeRecord.punchOutTime);
+      const duration = moment.duration(punchOutTime.diff(punchInTime));
+      const workingDurationInMinutes = Math.floor(duration.asMinutes());
+      employeeRecord.workingDuration = workingDurationInMinutes;
 
       //Fetrch user and its manager
       const user = await getRecordByKey(TABLE_NAMES.USERS, { _id: user_id });
@@ -91,8 +93,10 @@ module.exports.AttendanceService = {
           throw new Error(CONSTANTS.ERROR_MESSAGES.MANAGER_NOT_FOUND);
         }
         if (timesheet) {
-          const updatedSheet = timesheet.replace(/\n/g, "<br>");
-          const formattedDuration = HelperFunction.formatDuration(workingDuration);
+          const updatedSheet = timesheet.replace(/\n/g, "<br/>");
+          const formattedDuration = HelperFunction.formatDuration(
+            workingDurationInMinutes
+          );
           const emailOptions = {
             from: `"D2i Technology" <${user.officialEmail}>`,
             to: manager.officialEmail,
