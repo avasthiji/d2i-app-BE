@@ -44,6 +44,10 @@ const CONSTANTS = {
     FILE_UPLOAD_SUCCESS: "File Uploaded Successfully",
     MESSAGE_DELETE_SUCCESS: "Messge deleted Successfully",
     RECORD_NOT_FOUND: "Record not found",
+    REGULARIZATION_FIELDS_REQUIRED:
+      "Date and reason are required for regularization requests.",
+    INVALID_ACTION:
+      "Invalid action. Only 'approved' or 'rejected' are allowed.",
   },
 };
 module.exports = CONSTANTS;

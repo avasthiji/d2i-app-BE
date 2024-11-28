@@ -6,6 +6,7 @@ const Leave = require("../models/Leave");
 const Holiday = require("../models/Holiday");
 const File = require("../models/File");
 const SecureMessage = require("../models/SecureMessage");
+const Regularization = require("../models/Regularization");
 const TABLE_NAMES = {
   USERS: User,
   METRICS: Metric,
@@ -15,6 +16,7 @@ const TABLE_NAMES = {
   HOLIDAY: Holiday,
   FILE: File,
   SECUREMESSAGE: SecureMessage,
+  REGULARIZATION: Regularization,
 };
 module.exports = {
   TABLE_NAMES,
