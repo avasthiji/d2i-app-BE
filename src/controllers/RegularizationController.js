@@ -23,19 +23,8 @@ module.exports = {
   // Show: For managers/admin to view regularization requests submitted by their subordinates
   show: async (req, res, next) => {
     try {
-      const { userId: managerId, is_admin } = req.auth;
-      const { page = 1, limit = 10, status, month, year } = req.query;
-
-      const requests =
-        await RegularizationService.getRegularizationsByManagerIdOrAdmin({
-          managerId,
-          is_admin,
-          page,
-          limit,
-          status,
-          month,
-          year,
-        });
+      const requestId = req.params.regularization_id;
+      const requests = await RegularizationService.getReqByID(requestId);
 
       res.status(200).json(ApiResponse("success", requests));
     } catch (error) {
@@ -65,32 +54,48 @@ module.exports = {
   // Update: Handle regularization approval or rejection
   update: async (req, res, next) => {
     try {
-      const requestId = req.params.request_id;
-      const { status } = req.body;
-      const managerId = req.auth.userId;
-      const { is_admin } = req.auth;
-
-      let updatedRequest;
-
-      if (status === "approved") {
-        updatedRequest = await RegularizationService.approveRegularization(
+      const requestId = req.params.regularization_id;
+      const updateData = req.body;
+      const isReqExist = await RegularizationService.getReqByID(requestId);
+      if (!isReqExist) {
+        return res
+          .status(404)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND });
+      }
+      if (requestId && updateData) {
+        const resp = await RegularizationService.updateReq(
           requestId,
-          managerId,
-          is_admin
+          updateData
         );
-      } else if (status === "rejected") {
-        updatedRequest = await RegularizationService.rejectRegularization(
-          requestId,
-          managerId,
-          is_admin
-        );
+        if (!resp) {
+          res
+            .status(422)
+            .json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
+        }
+        res.status(200).json(resp);
       } else {
         return res
           .status(400)
           .json({ message: CONSTANTS.ERROR_MESSAGES.INVALID_ACTION });
       }
+    } catch (error) {
+      next(error);
+    }
+  },
 
-      res.status(200).json(ApiResponse("success", updatedRequest));
+  delete: async (req, res, next) => {
+    try {
+      const requestId = req.params.regularization_id;
+      const deleteRequest = await RegularizationService.deleteReq(requestId);
+
+      if (!deleteRequest) {
+        return res
+          .status(404)
+          .json({ message: CONSTANTS.ERROR_MESSAGES.RECORD_NOT_FOUND });
+      }
+      res
+        .status(200)
+        .json({ message: CONSTANTS.ERROR_MESSAGES.REQUEST_DELETED });
     } catch (error) {
       next(error);
     }

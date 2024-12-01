@@ -48,6 +48,7 @@ const CONSTANTS = {
       "Date and reason are required for regularization requests.",
     INVALID_ACTION:
       "Invalid action. Only 'approved' or 'rejected' are allowed.",
+    REQUEST_DELETED: "Request deleted successfully.",
   },
 };
 module.exports = CONSTANTS;

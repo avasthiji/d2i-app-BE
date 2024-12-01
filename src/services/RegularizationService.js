@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ValidationError } = require("../exceptions");
+const { ValidationError, NotFoundError } = require("../exceptions");
 const Regularization = require("../models/Regularization");
 const transporter = require("../utils/Mailer");
 const CONSTANTS = require("../constants");
@@ -8,6 +8,7 @@ const {
   getRecordByKey,
   insertRecord,
   updateRecordsByKey,
+  deleteRecordsById,
 } = require("../utils/QueryBuilder");
 const { TABLE_NAMES } = require("../utils/db");
 
@@ -108,6 +109,21 @@ module.exports.RegularizationService = {
     };
   },
 
+  getReqByID: async (requestId) => {
+    try {
+      const request = await getRecordByKey(TABLE_NAMES.REGULARIZATION, {
+        _id: requestId,
+      });
+
+      if (!request) {
+        throw new Error(CONSTANTS.ERROR_MESSAGES.RECORD_NOT_FOUND);
+      }
+      return request;
+    } catch (error) {
+      throw new NotFoundError(error.message);
+    }
+  },
+
   // Create a new regularization request
   createRegularization: async (data) => {
     try {
@@ -171,55 +187,26 @@ module.exports.RegularizationService = {
     }
   },
 
-  // Approve a regularization request
-  approveRegularization: async (requestId, managerId, is_admin) => {
+  updateReq: async (requestId, updateData) => {
     try {
-      const request = await getRecordByKey(TABLE_NAMES.REGULARIZATION, {
-        _id: requestId,
-      });
-      if (!request) throw new Error(CONSTANTS.ERROR_MESSAGES.REQUEST_NOT_FOUND);
-
-      if (!is_admin && request.managerId.toString() !== managerId) {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED);
-      }
-
-      if (request.status !== "pending") {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.REQUEST_ALREADY_PROCESSED);
-      }
-
-      return await updateRecordsByKey(
+      let updatedData = await updateRecordsByKey(
         TABLE_NAMES.REGULARIZATION,
         { _id: requestId },
-        { status: "approved" }
+        updateData
       );
+      return updatedData;
     } catch (error) {
-      throw new ValidationError(error.message);
+      throw new Error("Error updating regularization request:" + error.message);
     }
   },
 
-  // Reject a regularization request
-  rejectRegularization: async (requestId, managerId, is_admin) => {
+  deleteReq: async (requestId) => {
     try {
-      const request = await getRecordByKey(TABLE_NAMES.REGULARIZATION, {
+      return await deleteRecordsById(TABLE_NAMES.REGULARIZATION, {
         _id: requestId,
       });
-      if (!request) throw new Error(CONSTANTS.ERROR_MESSAGES.REQUEST_NOT_FOUND);
-
-      if (!is_admin && request.managerId.toString() !== managerId) {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.NOT_AUTHORIZED);
-      }
-
-      if (request.status !== "pending") {
-        throw new Error(CONSTANTS.ERROR_MESSAGES.REQUEST_ALREADY_PROCESSED);
-      }
-
-      return await updateRecordsByKey(
-        TABLE_NAMES.REGULARIZATION,
-        { _id: requestId },
-        { status: "rejected" }
-      );
     } catch (error) {
-      throw new ValidationError(error.message);
+      throw new Error("Error deleting regularization request:" + error.message);
     }
   },
 };
