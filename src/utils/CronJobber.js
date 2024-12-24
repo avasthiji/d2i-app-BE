@@ -108,7 +108,7 @@ async function sendDailyNotifications() {
   }
 }
 
-const job = new CronJob("0 6 * * *", async () => {
+const job = new CronJob("30 9 * * *", async () => {
   await sendDailyNotifications();
 });
 
@@ -143,7 +143,7 @@ async function CheckHolidayNotifications() {
   }
 }
 
-const HolidayJob = new CronJob("0 6 * * *", async () => {
+const HolidayJob = new CronJob("30 9 * * *", async () => {
   await CheckHolidayNotifications();
 });
 HolidayJob.start();
