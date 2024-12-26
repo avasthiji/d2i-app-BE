@@ -71,4 +71,31 @@ module.exports = {
       next(error);
     }
   },
+
+  delete: async (req, res, next) => {
+    try {
+      const { userId } = req.auth;
+      const targetUserId = req.params.me_id;
+      if (userId !== targetUserId) {
+        return res.status(403).json({
+          message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED,
+        });
+      }
+
+      const deletedUser = await UserService.deleteUser(userId);
+      if (!deletedUser) {
+        return res.status(404).json({
+          message: CONSTANTS.ERROR_MESSAGES.USER_NOT_FOUND,
+        });
+      }
+
+      res
+        .status(200)
+        .json(
+          ApiResponse("success", { message: "Account successfully deleted" })
+        );
+    } catch (error) {
+      next(error);
+    }
+  },
 };
