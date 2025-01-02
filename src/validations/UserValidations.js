@@ -48,6 +48,9 @@ const updateUserSchema = Joi.object({
   password: Joi.string().min(8).optional().messages({
     "string.min": "Password must be at least 8 characters long.",
   }),
+  joiningDate: Joi.date().optional().messages({
+    "date.base": "Please provide a valid date for the joining.",
+  }),
   anniversaryDate: Joi.date().optional().messages({
     "date.base": "Please provide a valid date for the anniversary.",
   }),

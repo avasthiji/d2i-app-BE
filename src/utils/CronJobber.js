@@ -51,6 +51,7 @@ async function sendDailyNotifications() {
 
   let messageParts = [];
 
+  // Send Birthday Emails
   if (events.birthdays.length > 0) {
     const birthdayNames = events.birthdays
       .map((user) => user.firstName + " " + user.lastName)
@@ -84,24 +85,69 @@ async function sendDailyNotifications() {
     messageParts.push(`🎉 It's ${birthdayNames}'s birthday today!`);
   }
 
+  // Send Work Anniversary Emails
   if (events.workAnniversaries.length > 0) {
     const workAnniversaryNames = events.workAnniversaries
       .map((user) => user.firstName + " " + user.lastName)
       .join(", ");
+
+    for (const anniversaryPerson of events.workAnniversaries) {
+      const mailOptions = {
+        from: `"D2i Technology" <${process.env.EMAIL_FROM}>`,
+        to: anniversaryPerson.officialEmail,
+        subject: "Happy Work Anniversary!",
+        cc: `${process.env.COMPANY_EMAIL}, ${process.env.EMAIL_FROM}`,
+        html: `<p>Hey ${anniversaryPerson.firstName} ${anniversaryPerson.lastName},
+        </p>
+        <p>
+        Congratulations on reaching another milestone at D2i Technology! Your dedication and hard work inspire us all.
+        </p>
+        <p>
+        Best wishes,<br>
+        D2i Technology
+       </p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
+
     messageParts.push(
       `💼 It's ${workAnniversaryNames}'s work anniversary today!`
     );
   }
 
+  // Send Marriage Anniversary Emails
   if (events.marriageAnniversaries.length > 0) {
     const marriageAnniversaryNames = events.marriageAnniversaries
       .map((user) => user.firstName + " " + user.lastName)
       .join(", ");
+
+    for (const anniversaryPerson of events.marriageAnniversaries) {
+      const mailOptions = {
+        from: `"D2i Technology" <${process.env.EMAIL_FROM}>`,
+        to: anniversaryPerson.officialEmail,
+        subject: "Happy Marriage Anniversary!",
+        cc: `${process.env.COMPANY_EMAIL}, ${process.env.EMAIL_FROM}`,
+        html: `<p>Hey ${anniversaryPerson.firstName} ${anniversaryPerson.lastName},
+        </p>
+        <p>
+        Happy marriage anniversary! May your love continue to blossom and grow stronger every day.
+        </p>
+        <p>
+        Best wishes,<br>
+        D2i Technology
+       </p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
+
     messageParts.push(
       `💍 It's ${marriageAnniversaryNames}'s marriage anniversary today!`
     );
   }
 
+  // Consolidated Push Notification
   if (messageParts.length > 0) {
     const fullMessage = messageParts.join("\n");
     await sendNotification("Daily Event Alert", fullMessage, "All");
