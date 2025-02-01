@@ -51,6 +51,9 @@ const updateUserSchema = Joi.object({
   anniversaryDate: Joi.date().optional().messages({
     "date.base": "Please provide a valid date for the anniversary.",
   }),
+  joiningDate: Joi.date().optional().messages({
+    "date.base": "Please provide a valid date for the joining.",
+  }),
 });
 
 module.exports = { createUserSchema, createAdminSchema, updateUserSchema };
