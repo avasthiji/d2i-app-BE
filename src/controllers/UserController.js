@@ -88,6 +88,7 @@ module.exports = {
           .json({ message: CONSTANTS.ERROR_MESSAGES.ACCESS_DENIED });
       }
     } catch (error) {
+      console.log("error--", error)
       if (error.code === 11000) {
         return res
           .status(400)
