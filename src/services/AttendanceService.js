@@ -101,7 +101,9 @@ module.exports.AttendanceService = {
             from: `"D2i Technology" <${user.officialEmail}>`,
             to: manager.officialEmail,
             subject: "Employee Timesheet",
-            cc: process.env.ADMIN_EMAIL || "ashish@d2itechnology.com",
+            cc: `${process.env.ADMIN_EMAIL || "ashish@d2itechnology.com"}, ${
+              user.officialEmail
+            }`,
             html: `<p>Hello ${manager.firstName} ${manager.lastName},</p>
             <p>${user.firstName} ${user.lastName} has submitted their timesheet for today's attendance:</p>
             <p>${updatedSheet}</p>
