@@ -99,6 +99,7 @@ module.exports.AttendanceService = {
           );
           const emailOptions = {
             from: `"D2i Technology" <${user.officialEmail}>`,
+            replyTo:`"${user.firstName} ${user.lastName}" <${user.officialEmail}>`,
             to: manager.officialEmail,
             subject: "Employee Timesheet",
             cc: `${process.env.ADMIN_EMAIL || "ashish@d2itechnology.com"}, ${
