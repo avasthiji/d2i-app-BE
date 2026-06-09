@@ -79,6 +79,7 @@ RouteHelper.resource(
 
 RouteHelper.resource(router, "forgotpassword", ForgotPasswordController);
 
+
 RouteHelper.resource(
   router,
   "attendance",

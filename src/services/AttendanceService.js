@@ -229,4 +229,96 @@ module.exports.AttendanceService = {
       throw new NotFoundError(error.message);
     }
   },
+
+  getMonthlyRecords: async (year, month, q, { page, limit }) => {
+    try {
+      const skips = (page - 1) * limit;
+
+      // Construct dates for the first and last day of the month
+      const startDate = new Date(Date.UTC(year, month - 1, 1));
+      const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+
+      const searchQuery = {};
+      if (q) {
+        searchQuery["$or"] = [
+          { "userDetails.firstName": { $regex: q, $options: "i" } },
+          { "userDetails.lastName": { $regex: q, $options: "i" } },
+          { "userDetails.officialEmail": { $regex: q, $options: "i" } },
+        ];
+      }
+
+      const attendanceRecords = await Attendance.aggregate([
+        {
+          $match: {
+            attendanceDate: { $gte: startDate, $lte: endDate },
+          },
+        },
+        { $unwind: "$employees" },
+        {
+          $group: {
+            _id: "$employees.user_id",
+            daysPresent: {
+              $sum: {
+                $cond: [{ $ifNull: ["$employees.punchInTime", false] }, 1, 0],
+              },
+            },
+            dailyRecords: {
+              $push: {
+                attendanceDate: "$attendanceDate",
+                punchInTime: "$employees.punchInTime",
+                punchOutTime: "$employees.punchOutTime",
+                isHoliday: "$isHoliday",
+              },
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        { $unwind: "$userDetails" },
+        { $match: searchQuery },
+        {
+          $addFields: {
+            userName: {
+              $concat: ["$userDetails.firstName", " ", "$userDetails.lastName"],
+            },
+            userProfile: "$userDetails.userProfile"
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            userName: 1,
+            userProfile: 1,
+            daysPresent: 1,
+            dailyRecords: 1,
+          },
+        },
+        { $sort: { userName: 1 } },
+        {
+          $facet: {
+            metadata: [{ $count: "total" }],
+            data: [{ $skip: skips }, { $limit: limit }],
+          },
+        },
+      ]);
+
+      const result = attendanceRecords[0];
+      const totalRecords = result && result.metadata.length > 0 ? result.metadata[0].total : 0;
+      
+      return {
+        records: result ? result.data : [],
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        currentPage: page,
+      };
+    } catch (error) {
+      throw new BadRequestError(error.message);
+    }
+  },
 };

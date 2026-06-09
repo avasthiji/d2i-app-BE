@@ -93,16 +93,29 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
       if (is_admin) {
-        const { attendanceDate: date, page = 1, limit = 10, q } = req.query;
+        const { attendanceDate: date, month, year, page = 1, limit = 10, q } = req.query;
 
-        const attendanceRecord = await AttendanceService.getAllRecords(
-          date,
-          q,
-          {
-            page: parseInt(page),
-            limit: parseInt(limit),
-          }
-        );
+        let attendanceRecord;
+        if (month && year) {
+          attendanceRecord = await AttendanceService.getMonthlyRecords(
+            parseInt(year),
+            parseInt(month),
+            q,
+            {
+              page: parseInt(page),
+              limit: parseInt(limit),
+            }
+          );
+        } else {
+          attendanceRecord = await AttendanceService.getAllRecords(
+            date,
+            q,
+            {
+              page: parseInt(page),
+              limit: parseInt(limit),
+            }
+          );
+        }
         res.json(ApiResponse("success", attendanceRecord || null));
       } else {
         res
