@@ -93,7 +93,7 @@ module.exports = {
     try {
       const { is_admin } = req.auth;
       if (is_admin) {
-        const { attendanceDate: date, month, year, page = 1, limit = 10, q } = req.query;
+        const { attendanceDate: date, month, year, page = 1, limit = 10, q, isExport } = req.query;
 
         let attendanceRecord;
         if (month && year) {
@@ -104,6 +104,7 @@ module.exports = {
             {
               page: parseInt(page),
               limit: parseInt(limit),
+              isExport: isExport === "true",
             }
           );
         } else {
@@ -113,6 +114,7 @@ module.exports = {
             {
               page: parseInt(page),
               limit: parseInt(limit),
+              isExport: isExport === "true",
             }
           );
         }

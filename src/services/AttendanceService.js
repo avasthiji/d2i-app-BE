@@ -125,7 +125,7 @@ module.exports.AttendanceService = {
     }
   },
 
-  getAllRecords: async (date, q, { page, limit }) => {
+  getAllRecords: async (date, q, { page, limit, isExport }) => {
     try {
       const skips = (page - 1) * limit;
       const searchQuery = {};
@@ -137,7 +137,8 @@ module.exports.AttendanceService = {
           { "employees.timesheet": { $regex: q, $options: "i" } },
         ];
       }
-      const attendanceRecords = await Attendance.aggregate([
+      
+      const pipeline = [
         {
           $match: { attendanceDate: new Date(date) },
         },
@@ -171,9 +172,14 @@ module.exports.AttendanceService = {
             isHoliday: { $first: "$isHoliday" },
           },
         },
-        { $skip: skips },
-        { $limit: limit },
-      ]);
+      ];
+
+      if (!isExport) {
+        pipeline.push({ $skip: skips });
+        pipeline.push({ $limit: limit });
+      }
+
+      const attendanceRecords = await Attendance.aggregate(pipeline);
 
       const employeeCount = await TABLE_NAMES.ATTENDANCE.aggregate([
         {
@@ -230,7 +236,7 @@ module.exports.AttendanceService = {
     }
   },
 
-  getMonthlyRecords: async (year, month, q, { page, limit }) => {
+  getMonthlyRecords: async (year, month, q, { page, limit, isExport }) => {
     try {
       const skips = (page - 1) * limit;
 
@@ -247,7 +253,7 @@ module.exports.AttendanceService = {
         ];
       }
 
-      const attendanceRecords = await Attendance.aggregate([
+      const pipeline = [
         {
           $match: {
             attendanceDate: { $gte: startDate, $lte: endDate },
@@ -300,13 +306,25 @@ module.exports.AttendanceService = {
           },
         },
         { $sort: { userName: 1 } },
-        {
+      ];
+
+      if (isExport) {
+        pipeline.push({
+          $facet: {
+            metadata: [{ $count: "total" }],
+            data: [], // No skip or limit
+          },
+        });
+      } else {
+        pipeline.push({
           $facet: {
             metadata: [{ $count: "total" }],
             data: [{ $skip: skips }, { $limit: limit }],
           },
-        },
-      ]);
+        });
+      }
+
+      const attendanceRecords = await Attendance.aggregate(pipeline);
 
       const result = attendanceRecords[0];
       const totalRecords = result && result.metadata.length > 0 ? result.metadata[0].total : 0;
