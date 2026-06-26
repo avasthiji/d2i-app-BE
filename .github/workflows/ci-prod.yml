@@ -20,7 +20,9 @@ jobs:
 
       - name: Deploy via Http Deploy Service
         run: |
-            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'args=/var/www/html/d2ibe' ${{secrets.DEPLOY_HOST}}/rmdir
-            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'file=@d2ibe.zip' -F 'args=/var/www/html/d2ibe' ${{secrets.DEPLOY_HOST}}/csync
+            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'args=-rf {WORKDIR}/*' ${{ secrets.DEPLOY_HOST }}/rm
+            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'file=@d2ibe.zip' -F 'args={WORKDIR}' ${{ secrets.DEPLOY_HOST }}/dummy
+            curl -H "X-TOKEN:${{ secrets.TOKEN }}" -X POST -F "args=-o {WORKDIR}/d2ibe.zip" ${{ secrets.DEPLOY_HOST }}/unzip
+            curl -H 'X-TOKEN: ${{ secrets.TOKEN }}' -X POST -F 'args=-rf {WORKDIR}/d2ibe.zip' ${{ secrets.DEPLOY_HOST }}/rm
             curl -H 'X-TOKEN:${{ secrets.TOKEN }}' -X POST -F 'args=restart|d2inodeservice.service' ${{secrets.DEPLOY_HOST}}/systemctl
 
