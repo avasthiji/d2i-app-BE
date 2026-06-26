@@ -20,7 +20,7 @@ module.exports.AttendanceService = {
         });
       }
 
-      // Check if the user already has a record
+      // Check if the user already has a record [text change to update build]
       const employeeRecord = attendance.employees.find(
         (employee) => employee.user_id.toString() === user_id
       );
@@ -99,12 +99,11 @@ module.exports.AttendanceService = {
           );
           const emailOptions = {
             from: `"D2i Technology" <${user.officialEmail}>`,
-            replyTo:`"${user.firstName} ${user.lastName}" <${user.officialEmail}>`,
+            replyTo: `"${user.firstName} ${user.lastName}" <${user.officialEmail}>`,
             to: manager.officialEmail,
             subject: "Employee Timesheet",
-            cc: `${process.env.ADMIN_EMAIL || "ashish@d2itechnology.com"}, ${
-              user.officialEmail
-            }`,
+            cc: `${process.env.ADMIN_EMAIL || "ashish@d2itechnology.com"}, ${user.officialEmail
+              }`,
             html: `<p>Hello ${manager.firstName} ${manager.lastName},</p>
             <p>${user.firstName} ${user.lastName} has submitted their timesheet for today's attendance:</p>
             <p>${updatedSheet}</p>
@@ -137,7 +136,7 @@ module.exports.AttendanceService = {
           { "employees.timesheet": { $regex: q, $options: "i" } },
         ];
       }
-      
+
       const pipeline = [
         {
           $match: { attendanceDate: new Date(date) },
@@ -328,7 +327,7 @@ module.exports.AttendanceService = {
 
       const result = attendanceRecords[0];
       const totalRecords = result && result.metadata.length > 0 ? result.metadata[0].total : 0;
-      
+
       return {
         records: result ? result.data : [],
         totalRecords,
