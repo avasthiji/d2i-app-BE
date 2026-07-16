@@ -25,6 +25,7 @@ async function getTodayEvents() {
     },
   });
   const usersWithWorkAnniversaries = await getRecordsByKey(TABLE_NAMES.USERS, {
+    userState: "active",
     $expr: {
       $eq: [{ $substr: ["$joiningDate", 5, 5] }, today],
     },
