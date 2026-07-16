@@ -34,7 +34,6 @@ async function getTodayEvents() {
   const usersWithMarriageAnniversaries = await getRecordsByKey(
     TABLE_NAMES.USERS,
     {
-      userState: "active",
       $expr: {
         $eq: [{ $substr: ["$anniversaryDate", 5, 5] }, today],
       },
